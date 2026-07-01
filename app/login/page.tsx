@@ -30,7 +30,11 @@ export default function LoginPage() {
         S
       </div>
       <h1 className="text-lg font-medium">Scholar Circle</h1>
-      <p className="mb-6 text-sm text-ink/60">Find funding. Find your people.</p>
+      <p className="text-sm text-ink/60">Find funding. Find your people.</p>
+<p className="mb-6 mt-2 text-xs text-ink/50">
+  Scholar Circle is a place for students to discover scholarships and sponsorships, and to
+  follow and connect with one another.
+</p>
 
       <button
         onClick={signInWithGoogle}
@@ -59,6 +63,11 @@ export default function LoginPage() {
           </button>
         </form>
       )}
+       <p className="mt-6 text-xs text-ink/40">
+        <a href="/privacy" className="underline">
+          Privacy Policy
+        </a>
+      </p>
     </div>
   );
 }
