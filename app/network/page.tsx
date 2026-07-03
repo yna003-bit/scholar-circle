@@ -14,7 +14,7 @@ export default async function NetworkPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, display_name, school")
+    .select("id, display_name, username, school")
     .neq("id", user.id);
 
   const { data: myFollowing } = await supabase
@@ -68,7 +68,10 @@ export default async function NetworkPage() {
                   {p.display_name?.slice(0, 2).toUpperCase() ?? "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{p.display_name}</p>
+                  <p className="text-sm font-medium">
+                    {p.display_name}
+                    {p.username ? <span className="ml-1 text-xs font-normal text-ink/40">@{p.username}</span> : null}
+                  </p>
                   <p className="text-xs text-ink/50">
                     {p.school ?? "No school listed"} · {countFor(p.id)} followers
                   </p>
