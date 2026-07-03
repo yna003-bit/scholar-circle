@@ -82,12 +82,10 @@ export default async function NetworkPage() {
                   requestId={friend.requestId}
                   initialStatus={friend.status}
                 />
+                <Link
+                  href={`/messages/${p.id}`}
+                  className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70"
+                >
+                  Message
+                </Link>
               </div>
-            </div>
-          );
-        })}
-        {profiles?.length === 0 ? <p className="text-sm text-ink/50">No other students yet.</p> : null}
-      </div>
-    </div>
-  );
-}

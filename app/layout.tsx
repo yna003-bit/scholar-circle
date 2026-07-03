@@ -25,6 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div className="flex gap-4 text-sm text-ink/70">
                 <Link href="/feed">Feed</Link>
                 <Link href="/network">Network</Link>
+                <Link href="/messages">Messages</Link>
               </div>
             ) : null}
           </div>
