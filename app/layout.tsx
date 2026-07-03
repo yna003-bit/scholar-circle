@@ -27,6 +27,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link href="/network">Network</Link>
                 <Link href="/messages">Messages</Link>
                 <Link href="/profile">Profile</Link>
+                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/settings">Settings</Link>
               </div>
             ) : null}
           </div>
