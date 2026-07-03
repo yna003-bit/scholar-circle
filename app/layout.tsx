@@ -1,6 +1,8 @@
 import "./globals.css";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SearchBar } from "@/components/SearchBar";
+import { MobileMenu } from "@/components/MobileMenu";
 
 export const metadata = {
   title: "Scholar Circle",
@@ -17,19 +19,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <nav className="border-b border-black/10 bg-white">
-          <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-            <Link href="/" className="font-medium text-ink">
+          <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+            <Link href="/" className="whitespace-nowrap font-medium text-ink">
               Scholar Circle
             </Link>
             {user ? (
-              <div className="flex gap-4 text-sm text-ink/70">
-                <Link href="/feed">Feed</Link>
-                <Link href="/network">Network</Link>
-                <Link href="/messages">Messages</Link>
-                <Link href="/profile">Profile</Link>
-                <Link href="/dashboard">Dashboard</Link>
-                <Link href="/settings">Settings</Link>
-              </div>
+              <>
+                <Link href="/feed" className="whitespace-nowrap text-sm text-ink/70">
+                  Feed
+                </Link>
+                <SearchBar />
+                <MobileMenu />
+              </>
             ) : null}
           </div>
         </nav>
