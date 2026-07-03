@@ -89,3 +89,11 @@ export default async function NetworkPage() {
                   Message
                 </Link>
               </div>
+            </div>
+          );
+        })}
+        {profiles?.length === 0 ? <p className="text-sm text-ink/50">No other students yet.</p> : null}
+      </div>
+    </div>
+  );
+}
