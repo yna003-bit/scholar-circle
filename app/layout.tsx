@@ -25,9 +25,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             {user ? (
               <>
-                <Link href="/feed" className="whitespace-nowrap text-sm text-ink/70">
-                  Feed
-                </Link>
                 <SearchBar />
                 <MobileMenu />
               </>
