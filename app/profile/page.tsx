@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/ProfileForm";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Avatar } from "@/components/Avatar";
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -12,7 +13,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio, is_verified")
+    .select("id, display_name, username, school, bio, is_verified, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -33,14 +34,10 @@ export default async function ProfilePage() {
     .select("followed_id", { count: "exact", head: true })
     .eq("follower_id", user.id);
 
-  const initials = (profile.display_name ?? "?").slice(0, 2).toUpperCase();
-
   return (
     <div>
       <div className="mb-6 flex items-center gap-5">
-        <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-ink/5 text-xl font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
-          {initials}
-        </div>
+        <Avatar url={profile.avatar_url} name={profile.display_name} size={72} />
         <div className="flex flex-1 justify-around text-center">
           <div>
             <p className="text-base font-medium">{postedCount ?? 0}</p>
