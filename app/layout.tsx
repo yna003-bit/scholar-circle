@@ -16,6 +16,31 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     data: { user },
   } = await supabase.auth.getUser();
 
+  let menuProfile = null;
+  let followingCount = 0;
+  let followerCount = 0;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, username")
+      .eq("id", user.id)
+      .single();
+    menuProfile = profile;
+
+    const { count: fc } = await supabase
+      .from("follows")
+      .select("followed_id", { count: "exact", head: true })
+      .eq("follower_id", user.id);
+    followingCount = fc ?? 0;
+
+    const { count: flc } = await supabase
+      .from("follows")
+      .select("follower_id", { count: "exact", head: true })
+      .eq("followed_id", user.id);
+    followerCount = flc ?? 0;
+  }
+
   return (
     <html lang="en">
       <head>
@@ -40,7 +65,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {user ? (
               <>
                 <SearchBar />
-                <MobileMenu />
+                <MobileMenu
+                  displayName={menuProfile?.display_name ?? null}
+                  username={menuProfile?.username ?? null}
+                  followingCount={followingCount}
+                  followerCount={followerCount}
+                />
               </>
             ) : null}
           </div>
