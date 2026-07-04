@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export default async function NetworkPage() {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function NetworkPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school")
+    .select("id, display_name, username, school, is_verified")
     .neq("id", user.id);
 
   const { data: myFollowing } = await supabase
@@ -70,6 +71,7 @@ export default async function NetworkPage() {
                 <div>
                   <p className="text-sm font-medium">
                     {p.display_name}
+                    <VerifiedBadge verified={p.is_verified} />
                     {p.username ? <span className="ml-1 text-xs font-normal text-ink/40">@{p.username}</span> : null}
                   </p>
                   <p className="text-xs text-ink/50">

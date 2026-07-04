@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, username")
+      .select("display_name, username, is_verified")
       .eq("id", user.id)
       .single();
     menuProfile = profile;
@@ -68,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <MobileMenu
                   displayName={menuProfile?.display_name ?? null}
                   username={menuProfile?.username ?? null}
+                  isVerified={menuProfile?.is_verified ?? false}
                   followingCount={followingCount}
                   followerCount={followerCount}
                 />

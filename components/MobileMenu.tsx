@@ -6,15 +6,18 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export function MobileMenu({
   displayName,
   username,
+  isVerified,
   followingCount,
   followerCount,
 }: {
   displayName: string | null;
   username: string | null;
+  isVerified: boolean;
   followingCount: number;
   followerCount: number;
 }) {
@@ -60,6 +63,7 @@ export function MobileMenu({
               </div>
               <p className="mt-2 text-sm font-medium text-ink dark:text-neutral-100">
                 {displayName ?? "Your profile"}
+                <VerifiedBadge verified={isVerified} />
               </p>
               {username ? (
                 <p className="text-xs text-ink/40 dark:text-neutral-500">@{username}</p>

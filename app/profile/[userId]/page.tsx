@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VerifyToggle } from "@/components/VerifyToggle";
 
 export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
   const supabase = createClient();
@@ -15,9 +17,15 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
     redirect("/profile");
   }
 
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio")
+    .select("id, display_name, username, school, bio, is_verified")
     .eq("id", params.userId)
     .single();
 
@@ -85,7 +93,10 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
           </div>
         </div>
       </div>
-      <p className="text-sm font-medium">{profile.display_name}</p>
+      <p className="text-sm font-medium">
+        {profile.display_name}
+        <VerifiedBadge verified={profile.is_verified} />
+      </p>
       {profile.username ? (
         <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
       ) : null}
@@ -94,7 +105,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
       ) : null}
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <FollowButton userId={user.id} targetId={profile.id} initiallyFollowing={!!myFollow} />
         <FriendButton
           userId={user.id}
@@ -108,6 +119,9 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         >
           Message
         </Link>
+        {viewer?.is_admin ? (
+          <VerifyToggle targetId={profile.id} initiallyVerified={!!profile.is_verified} />
+        ) : null}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThumbsUp, MessageCircle, Share2, Pencil } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Opportunity = {
   id: string;
@@ -17,7 +18,7 @@ type Opportunity = {
   tags: string[] | null;
   author_id: string;
   created_at: string;
-  profiles: { display_name: string } | null;
+  profiles: { display_name: string; is_verified?: boolean } | null;
   likes: { user_id: string }[];
   comments: {
     id: string;
@@ -235,7 +236,10 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
                 {initials(opp.profiles?.display_name)}
               </div>
               <div>
-                <p className="text-sm font-medium hover:underline">{opp.profiles?.display_name ?? "A student"}</p>
+                <p className="text-sm font-medium hover:underline">
+                  {opp.profiles?.display_name ?? "A student"}
+                  <VerifiedBadge verified={opp.profiles?.is_verified} />
+                </p>
                 <p className="text-xs text-ink/40 dark:text-neutral-500">{timeAgo(opp.created_at)}</p>
               </div>
             </Link>
