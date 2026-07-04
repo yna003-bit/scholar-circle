@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type Opportunity = {
   id: string;
   title: string;
-  sponsor_name: string;
+  sponsor_name: string | null;
   amount: number | null;
   currency: string | null;
   deadline: string | null;
@@ -23,19 +23,16 @@ export function PostForm({ userId }: { userId: string }) {
   const supabase = createClient();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", sponsor_name: "", amount: "", deadline: "", description: "" });
+  const [form, setForm] = useState({ title: "", description: "" });
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     await supabase.from("opportunities").insert({
       author_id: userId,
       title: form.title,
-      sponsor_name: form.sponsor_name,
-      amount: form.amount ? Number(form.amount) : null,
-      deadline: form.deadline || null,
       description: form.description,
     });
-    setForm({ title: "", sponsor_name: "", amount: "", deadline: "", description: "" });
+    setForm({ title: "", description: "" });
     setOpen(false);
     router.refresh();
   }
@@ -60,33 +57,13 @@ export function PostForm({ userId }: { userId: string }) {
         onChange={(e) => setForm({ ...form, title: e.target.value })}
         className="rounded-lg border border-black/15 px-3 py-2 text-sm"
       />
-      <input
-        required
-        placeholder="Sponsor name"
-        value={form.sponsor_name}
-        onChange={(e) => setForm({ ...form, sponsor_name: e.target.value })}
-        className="rounded-lg border border-black/15 px-3 py-2 text-sm"
-      />
-      <div className="flex gap-2">
-        <input
-          type="number"
-          placeholder="Amount (EUR)"
-          value={form.amount}
-          onChange={(e) => setForm({ ...form, amount: e.target.value })}
-          className="w-1/2 rounded-lg border border-black/15 px-3 py-2 text-sm"
-        />
-        <input
-          type="date"
-          value={form.deadline}
-          onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-          className="w-1/2 rounded-lg border border-black/15 px-3 py-2 text-sm"
-        />
-      </div>
       <textarea
-        placeholder="Description"
+        required
+        placeholder="Description — sponsor, amount, deadline, how to apply, anything else"
         value={form.description}
         onChange={(e) => setForm({ ...form, description: e.target.value })}
         className="rounded-lg border border-black/15 px-3 py-2 text-sm"
+        rows={4}
       />
       <div className="flex gap-2">
         <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
@@ -140,7 +117,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
         <div>
           <p className="text-sm font-medium">{opp.title}</p>
           <p className="text-xs text-ink/50">
-            {opp.sponsor_name} · posted by {opp.profiles?.display_name ?? "a student"}
+            {opp.sponsor_name ? `${opp.sponsor_name} · ` : ""}posted by {opp.profiles?.display_name ?? "a student"}
           </p>
         </div>
         {opp.amount ? (
@@ -150,7 +127,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
         ) : null}
       </div>
 
-      {opp.description ? <p className="mt-2 text-sm text-ink/70">{opp.description}</p> : null}
+      {opp.description ? <p className="mt-2 whitespace-pre-wrap text-sm text-ink/70">{opp.description}</p> : null}
       {opp.deadline ? <p className="mt-1 text-xs text-ink/50">Deadline: {opp.deadline}</p> : null}
 
       <div className="mt-3 flex gap-4 border-t border-black/5 pt-2 text-xs text-ink/60">
