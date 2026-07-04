@@ -19,7 +19,7 @@ export default async function FeedPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-lg font-medium">Scholarships &amp; sponsorships</h1>
+      <h1 className="mb-4 text-lg font-medium">Scholarships &amp; Grants</h1>
       <PostForm userId={user.id} />
       {(opportunities ?? []).map((opp: any) => (
         <OpportunityCard key={opp.id} opp={opp} userId={user.id} />
