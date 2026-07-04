@@ -61,9 +61,12 @@ export function PostForm({ userId }: { userId: string }) {
         required
         placeholder="Description — sponsor, amount, deadline, how to apply, anything else"
         value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-        className="rounded-lg border border-black/15 px-3 py-2 text-sm"
-        rows={4}
+        onChange={(e) => {
+          setForm({ ...form, description: e.target.value });
+          e.target.style.height = "auto";
+          e.target.style.height = `${e.target.scrollHeight}px`;
+        }}
+        className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-2 text-sm"
       />
       <div className="flex gap-2">
         <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
