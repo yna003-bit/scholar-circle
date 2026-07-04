@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThumbsUp, MessageCircle, Share2, Pencil } from "lucide-react";
@@ -46,7 +47,7 @@ function linkify(text: string) {
     if (/^(?:https?:\/\/|www\.)/.test(part)) {
       const href = part.startsWith("http") ? part : `https://${part}`;
       return (
-        <a
+        
           key={i}
           href={href}
           target="_blank"
@@ -207,15 +208,15 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
       ) : (
         <>
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2.5">
+            <Link href={`/profile/${opp.author_id}`} className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
                 {initials(opp.profiles?.display_name)}
               </div>
               <div>
-                <p className="text-sm font-medium">{opp.profiles?.display_name ?? "A student"}</p>
+                <p className="text-sm font-medium hover:underline">{opp.profiles?.display_name ?? "A student"}</p>
                 <p className="text-xs text-ink/40 dark:text-neutral-500">{timeAgo(opp.created_at)}</p>
               </div>
-            </div>
+            </Link>
             <div className="flex shrink-0 items-center gap-2">
               {opp.amount ? (
                 <span className="whitespace-nowrap rounded-md bg-ink/5 px-2 py-1 text-xs font-medium text-ink dark:bg-white/10 dark:text-neutral-100">

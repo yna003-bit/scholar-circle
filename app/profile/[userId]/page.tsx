@@ -1,0 +1,114 @@
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { FollowButton } from "@/components/FollowButton";
+import { FriendButton } from "@/components/FriendButton";
+
+export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  if (params.userId === user.id) {
+    redirect("/profile");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, display_name, username, school, bio")
+    .eq("id", params.userId)
+    .single();
+
+  if (!profile) notFound();
+
+  const { count: postedCount } = await supabase
+    .from("opportunities")
+    .select("id", { count: "exact", head: true })
+    .eq("author_id", profile.id);
+
+  const { count: followerCount } = await supabase
+    .from("follows")
+    .select("follower_id", { count: "exact", head: true })
+    .eq("followed_id", profile.id);
+
+  const { count: followingCount } = await supabase
+    .from("follows")
+    .select("followed_id", { count: "exact", head: true })
+    .eq("follower_id", profile.id);
+
+  const { data: myFollow } = await supabase
+    .from("follows")
+    .select("follower_id")
+    .eq("follower_id", user.id)
+    .eq("followed_id", profile.id)
+    .maybeSingle();
+
+  const { data: friendRequest } = await supabase
+    .from("friend_requests")
+    .select("id, sender_id, receiver_id, status")
+    .or(
+      `and(sender_id.eq.${user.id},receiver_id.eq.${profile.id}),and(sender_id.eq.${profile.id},receiver_id.eq.${user.id})`
+    )
+    .maybeSingle();
+
+  let friendStatus: "none" | "sent" | "received" | "friends" = "none";
+  let friendRequestId: string | null = null;
+  if (friendRequest) {
+    friendRequestId = friendRequest.id;
+    if (friendRequest.status === "accepted") friendStatus = "friends";
+    else if (friendRequest.sender_id === user.id) friendStatus = "sent";
+    else friendStatus = "received";
+  }
+
+  const initials = (profile.display_name ?? "?").slice(0, 2).toUpperCase();
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center gap-5">
+        <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-ink/5 text-xl font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
+          {initials}
+        </div>
+        <div className="flex flex-1 justify-around text-center">
+          <div>
+            <p className="text-base font-medium">{postedCount ?? 0}</p>
+            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Posts</p>
+          </div>
+          <div>
+            <p className="text-base font-medium">{followerCount ?? 0}</p>
+            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Followers</p>
+          </div>
+          <div>
+            <p className="text-base font-medium">{followingCount ?? 0}</p>
+            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Following</p>
+          </div>
+        </div>
+      </div>
+      <p className="text-sm font-medium">{profile.display_name}</p>
+      {profile.username ? (
+        <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
+      ) : null}
+      <p className="text-xs text-ink/40 dark:text-neutral-500">{profile.school ?? "No school listed"}</p>
+      {profile.bio ? (
+        <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
+      ) : null}
+
+      <div className="mt-4 flex gap-2">
+        <FollowButton userId={user.id} targetId={profile.id} initiallyFollowing={!!myFollow} />
+        <FriendButton
+          userId={user.id}
+          targetId={profile.id}
+          requestId={friendRequestId}
+          initialStatus={friendStatus}
+        />
+        <Link
+          href={`/messages/${profile.id}`}
+          className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70 dark:border-white/15 dark:text-neutral-300"
+        >
+          Message
+        </Link>
+      </div>
+    </div>
+  );
+}
