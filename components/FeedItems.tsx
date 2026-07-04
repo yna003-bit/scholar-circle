@@ -28,7 +28,7 @@ function linkify(text: string) {
     if (/^(?:https?:\/\/|www\.)/.test(part)) {
       const href = part.startsWith("http") ? part : `https://${part}`;
       return (
-        
+        <a
           key={i}
           href={href}
           target="_blank"
