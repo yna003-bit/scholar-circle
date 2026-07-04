@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SearchBar } from "@/components/SearchBar";
 import { MobileMenu } from "@/components/MobileMenu";
-
+import { Footer } from "@/components/Footer";
 export const metadata = {
   title: "Scholar Circle",
   description: "Find funding. Find your people.",
@@ -35,6 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </nav>
         <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+        <Footer />
       </body>
     </html>
   );

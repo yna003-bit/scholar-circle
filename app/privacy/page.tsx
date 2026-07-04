@@ -35,6 +35,16 @@ export default function PrivacyPage() {
         other third party.
       </p>
 
+      <h2 className="mt-6 text-sm font-medium">Cookies</h2>
+      <p className="text-sm text-ink/80">
+        We use one essential cookie to keep you signed in between visits. It doesn&apos;t track
+        you across other websites and isn&apos;t used for advertising. See our{" "}
+        <a href="/cookies" className="underline">
+          Cookies page
+        </a>{" "}
+        for details.
+      </p>
+
       <h2 className="mt-6 text-sm font-medium">Data storage and protection</h2>
       <p className="text-sm text-ink/80">
         Data is stored in a Postgres database managed by Supabase, protected by row-level security
