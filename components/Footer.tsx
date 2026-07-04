@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Footer() {
   const links = [
-    { href: "/about", label: "Scholar Circle" },
+    { href: "/about", label: "About" },
     { href: "/privacy", label: "Privacy Policy" },
     { href: "/terms", label: "Terms of Use" },
     { href: "/accessibility", label: "Accessibility Statement" },
