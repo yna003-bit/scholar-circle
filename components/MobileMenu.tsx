@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -51,6 +52,7 @@ export function MobileMenu() {
                   {label}
                 </Link>
               ))}
+              <ThemeToggle />
               <div className="my-2 border-t border-black/10" />
               <button
                 onClick={signOut}
