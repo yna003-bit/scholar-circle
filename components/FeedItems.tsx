@@ -15,10 +15,28 @@ type Opportunity = {
   description: string | null;
   tags: string[] | null;
   author_id: string;
+  created_at: string;
   profiles: { display_name: string } | null;
   likes: { user_id: string }[];
   comments: { id: string; body: string; user_id: string; profiles: { display_name: string } | null }[];
 };
+
+function timeAgo(dateString: string) {
+  const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateString).toLocaleDateString();
+}
+
+function initials(name: string | undefined | null) {
+  if (!name) return "?";
+  return name.slice(0, 2).toUpperCase();
+}
 
 function linkify(text: string) {
   const urlRegex = /((?:https?:\/\/|www\.)[^\s]+)/g;
@@ -189,12 +207,14 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
       ) : (
         <>
           <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-sm font-medium">{opp.title}</p>
-              <p className="text-xs text-ink/50 dark:text-neutral-400">
-                {opp.sponsor_name ? `${opp.sponsor_name} · ` : ""}posted by{" "}
-                {opp.profiles?.display_name ?? "a student"}
-              </p>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
+                {initials(opp.profiles?.display_name)}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{opp.profiles?.display_name ?? "A student"}</p>
+                <p className="text-xs text-ink/40 dark:text-neutral-500">{timeAgo(opp.created_at)}</p>
+              </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {opp.amount ? (
@@ -213,6 +233,11 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
               ) : null}
             </div>
           </div>
+
+          <p className="mt-3 text-sm font-medium">{opp.title}</p>
+          {opp.sponsor_name ? (
+            <p className="text-xs text-ink/50 dark:text-neutral-400">{opp.sponsor_name}</p>
+          ) : null}
 
           {opp.description ? (
             <p className="mt-2 whitespace-pre-wrap text-sm text-ink/70 dark:text-neutral-300">
