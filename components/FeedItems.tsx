@@ -4,7 +4,7 @@ import { useState, useRef, createElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ThumbsUp, MessageCircle, Share2, Pencil } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Opportunity = {
@@ -20,6 +20,7 @@ type Opportunity = {
   created_at: string;
   profiles: { display_name: string; is_verified?: boolean } | null;
   likes: { user_id: string }[];
+  saved_posts: { user_id: string }[];
   comments: {
     id: string;
     body: string;
@@ -137,6 +138,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
   const supabase = createClient();
   const router = useRouter();
   const liked = opp.likes.some((l) => l.user_id === userId);
+  const saved = opp.saved_posts.some((s) => s.user_id === userId);
   const isAuthor = opp.author_id === userId;
   const [commentBody, setCommentBody] = useState("");
   const [showComments, setShowComments] = useState(false);
@@ -150,6 +152,21 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
     } else {
       await supabase.from("likes").insert({ user_id: userId, opportunity_id: opp.id });
     }
+    router.refresh();
+  }
+
+  async function toggleSave() {
+    if (saved) {
+      await supabase.from("saved_posts").delete().match({ user_id: userId, opportunity_id: opp.id });
+    } else {
+      await supabase.from("saved_posts").insert({ user_id: userId, opportunity_id: opp.id });
+    }
+    router.refresh();
+  }
+
+  async function deletePost() {
+    if (!confirm("Delete this post? This can't be undone.")) return;
+    await supabase.from("opportunities").delete().eq("id", opp.id);
     router.refresh();
   }
 
@@ -249,14 +266,34 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
                   {opp.currency ?? "EUR"} {opp.amount}
                 </span>
               ) : null}
+              <button
+                onClick={toggleSave}
+                aria-label={saved ? "Unsave post" : "Save post"}
+                className={
+                  saved
+                    ? "text-ink dark:text-neutral-100"
+                    : "text-ink/40 hover:text-ink/70 dark:text-neutral-500 dark:hover:text-neutral-200"
+                }
+              >
+                <Bookmark size={15} className={saved ? "fill-current" : ""} />
+              </button>
               {isAuthor ? (
-                <button
-                  onClick={() => setEditing(true)}
-                  aria-label="Edit post"
-                  className="text-ink/40 hover:text-ink/70 dark:text-neutral-500 dark:hover:text-neutral-200"
-                >
-                  <Pencil size={15} />
-                </button>
+                <>
+                  <button
+                    onClick={() => setEditing(true)}
+                    aria-label="Edit post"
+                    className="text-ink/40 hover:text-ink/70 dark:text-neutral-500 dark:hover:text-neutral-200"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    onClick={deletePost}
+                    aria-label="Delete post"
+                    className="text-ink/40 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </>
               ) : null}
             </div>
           </div>

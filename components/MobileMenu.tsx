@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers } from "lucide-react";
+import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers, Bookmark } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
@@ -36,6 +36,7 @@ export function MobileMenu({
     { href: "/network", label: "Network", Icon: Users },
     { href: "/groups", label: "Groups", Icon: Layers },
     { href: "/messages", label: "Messages", Icon: MessageCircle },
+    { href: "/saved", label: "Saved", Icon: Bookmark },
     { href: "/profile", label: "Profile", Icon: User },
     { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
     { href: "/settings", label: "Settings", Icon: Settings },
@@ -80,7 +81,7 @@ export function MobileMenu({
 
             <div className="border-t border-black/10 pt-2 dark:border-white/10" />
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 overflow-y-auto">
               {items.map(({ href, label, Icon }) => (
                 <Link
                   key={href}
