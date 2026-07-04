@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, createElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -19,7 +19,13 @@ type Opportunity = {
   created_at: string;
   profiles: { display_name: string } | null;
   likes: { user_id: string }[];
-  comments: { id: string; body: string; user_id: string; profiles: { display_name: string } | null }[];
+  comments: {
+    id: string;
+    body: string;
+    user_id: string;
+    profiles: { display_name: string } | null;
+    comment_likes: { user_id: string }[];
+  }[];
 };
 
 function timeAgo(dateString: string) {
@@ -46,16 +52,16 @@ function linkify(text: string) {
     if (!part) return null;
     if (/^(?:https?:\/\/|www\.)/.test(part)) {
       const href = part.startsWith("http") ? part : `https://${part}`;
-      return (
-        <a
-          key={i}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="break-all text-blue-600 underline dark:text-blue-400"
-        >
-          {part}
-        </a>
+      return createElement(
+        "a",
+        {
+          key: i,
+          href: href,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "break-all text-blue-600 underline dark:text-blue-400",
+        },
+        part
       );
     }
     return <span key={i}>{part}</span>;
@@ -133,6 +139,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
   const isAuthor = opp.author_id === userId;
   const [commentBody, setCommentBody] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: opp.title, description: opp.description ?? "" });
 
@@ -150,6 +157,21 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
     if (!commentBody.trim()) return;
     await supabase.from("comments").insert({ user_id: userId, opportunity_id: opp.id, body: commentBody });
     setCommentBody("");
+    if (commentInputRef.current) commentInputRef.current.style.height = "auto";
+    router.refresh();
+  }
+
+  async function toggleCommentLike(commentId: string, alreadyLiked: boolean) {
+    if (alreadyLiked) {
+      await supabase.from("comment_likes").delete().match({ comment_id: commentId, user_id: userId });
+    } else {
+      await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: userId });
+    }
+    router.refresh();
+  }
+
+  async function deleteComment(commentId: string) {
+    await supabase.from("comments").delete().eq("id", commentId);
     router.refresh();
   }
 
@@ -253,7 +275,11 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
             <p className="mt-3 text-xs text-ink/40 dark:text-neutral-500">
               {opp.likes.length > 0 ? `${opp.likes.length} likes` : ""}
               {opp.likes.length > 0 && opp.comments.length > 0 ? " · " : ""}
-              {opp.comments.length > 0 ? `${opp.comments.length} comments` : ""}
+              {opp.comments.length > 0 ? (
+                <button onClick={() => setShowComments(!showComments)} className="hover:underline">
+                  {opp.comments.length} comments
+                </button>
+              ) : null}
             </p>
           ) : null}
 
@@ -285,19 +311,49 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
 
           {showComments ? (
             <div className="mt-2 border-t border-black/5 pt-2 dark:border-white/5">
-              {opp.comments.map((c) => (
-                <p key={c.id} className="mb-1 text-xs text-ink/70 dark:text-neutral-300">
-                  <span className="font-medium">{c.profiles?.display_name ?? "Student"}:</span> {c.body}
-                </p>
-              ))}
+              {opp.comments.map((c) => {
+                const commentLiked = c.comment_likes.some((l) => l.user_id === userId);
+                const canDelete = c.user_id === userId || isAuthor;
+                return (
+                  <div key={c.id} className="mb-2">
+                    <p className="text-xs text-ink/70 dark:text-neutral-300">
+                      <span className="font-medium">{c.profiles?.display_name ?? "Student"}:</span> {c.body}
+                    </p>
+                    <div className="mt-0.5 flex items-center gap-3 text-[11px] text-ink/40 dark:text-neutral-500">
+                      <button
+                        onClick={() => toggleCommentLike(c.id, commentLiked)}
+                        className={
+                          commentLiked ? "font-medium text-blue-600 dark:text-blue-400" : "hover:text-ink/70 dark:hover:text-neutral-300"
+                        }
+                      >
+                        Like{c.comment_likes.length > 0 ? ` (${c.comment_likes.length})` : ""}
+                      </button>
+                      {canDelete ? (
+                        <button onClick={() => deleteComment(c.id)} className="hover:text-red-600">
+                          Delete
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
               <form onSubmit={addComment} className="mt-2 flex gap-2">
-                <input
+                <textarea
+                  ref={commentInputRef}
                   value={commentBody}
-                  onChange={(e) => setCommentBody(e.target.value)}
+                  onChange={(e) => {
+                    setCommentBody(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   placeholder="Write a comment"
-                  className="flex-1 rounded-lg border border-black/15 px-3 py-1.5 text-xs"
+                  rows={1}
+                  className="min-h-[32px] flex-1 resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-1.5 text-xs"
                 />
-                <button type="submit" className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white">
+                <button
+                  type="submit"
+                  className="h-fit self-end rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white"
+                >
                   Send
                 </button>
               </form>
