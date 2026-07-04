@@ -64,22 +64,22 @@ export default async function NetworkPage() {
           const friend = friendStateFor(p.id);
           return (
             <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink">
+              <Link href={`/profile/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink">
                   {p.display_name?.slice(0, 2).toUpperCase() ?? "?"}
                 </div>
-                <div>
-                  <p className="text-sm font-medium">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium hover:underline">
                     {p.display_name}
                     <VerifiedBadge verified={p.is_verified} />
                     {p.username ? <span className="ml-1 text-xs font-normal text-ink/40">@{p.username}</span> : null}
                   </p>
-                  <p className="text-xs text-ink/50">
+                  <p className="truncate text-xs text-ink/50">
                     {p.school ?? "No school listed"} · {countFor(p.id)} followers
                   </p>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
+              </Link>
+              <div className="ml-2 flex shrink-0 items-center gap-2">
                 <FollowButton userId={user.id} targetId={p.id} initiallyFollowing={followingSet.has(p.id)} />
                 <FriendButton
                   userId={user.id}
