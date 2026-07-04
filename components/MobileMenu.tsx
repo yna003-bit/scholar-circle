@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function MobileMenu() {
@@ -21,6 +21,7 @@ export function MobileMenu() {
 
   const items = [
     { href: "/network", label: "Network", Icon: Users },
+    { href: "/groups", label: "Groups", Icon: Layers },
     { href: "/messages", label: "Messages", Icon: MessageCircle },
     { href: "/profile", label: "Profile", Icon: User },
     { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
