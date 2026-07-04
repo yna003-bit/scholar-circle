@@ -10,21 +10,28 @@ export default async function FeedPage() {
 
   if (!user) redirect("/login");
 
-  const { data: opportunities } = await supabase
+  const { data: opportunities, error } = await supabase
     .from("opportunities")
     .select(
       "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, profiles(display_name), likes(user_id), comments(id, body, user_id, profiles(display_name))"
     )
     .order("created_at", { ascending: false });
 
+  if (error) {
+    console.error("Feed query error:", error);
+  }
+
   return (
     <div>
       <h1 className="mb-4 text-lg font-medium">Scholarships &amp; Grants</h1>
       <PostForm userId={user.id} />
+      {error ? (
+        <p className="text-sm text-red-600">Couldn&apos;t load the feed: {error.message}</p>
+      ) : null}
       {(opportunities ?? []).map((opp: any) => (
         <OpportunityCard key={opp.id} opp={opp} userId={user.id} />
       ))}
-      {opportunities?.length === 0 ? (
+      {!error && (opportunities ?? []).length === 0 ? (
         <p className="text-sm text-ink/50">No listings yet — be the first to post one.</p>
       ) : null}
     </div>
