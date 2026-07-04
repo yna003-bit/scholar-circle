@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Avatar } from "@/components/Avatar";
 
 type Opportunity = {
   id: string;
@@ -18,7 +19,7 @@ type Opportunity = {
   tags: string[] | null;
   author_id: string;
   created_at: string;
-  profiles: { display_name: string; is_verified?: boolean } | null;
+  profiles: { display_name: string; is_verified?: boolean; avatar_url?: string | null } | null;
   likes: { user_id: string }[];
   saved_posts: { user_id: string }[];
   comments: {
@@ -249,9 +250,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
         <>
           <div className="flex items-start justify-between gap-2">
             <Link href={`/profile/${opp.author_id}`} className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
-                {initials(opp.profiles?.display_name)}
-              </div>
+              <Avatar url={opp.profiles?.avatar_url} name={opp.profiles?.display_name} size={36} />
               <div>
                 <p className="text-sm font-medium hover:underline">
                   {opp.profiles?.display_name ?? "A student"}

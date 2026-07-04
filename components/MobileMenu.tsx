@@ -7,17 +7,20 @@ import { createClient } from "@/lib/supabase/client";
 import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers, Bookmark } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Avatar } from "@/components/Avatar";
 
 export function MobileMenu({
   displayName,
   username,
   isVerified,
+  avatarUrl,
   followingCount,
   followerCount,
 }: {
   displayName: string | null;
   username: string | null;
   isVerified: boolean;
+  avatarUrl?: string | null;
   followingCount: number;
   followerCount: number;
 }) {
@@ -42,8 +45,6 @@ export function MobileMenu({
     { href: "/settings", label: "Settings", Icon: Settings },
   ];
 
-  const initials = (displayName ?? "?").slice(0, 2).toUpperCase();
-
   return (
     <div className="relative">
       <button onClick={() => setOpen(true)} aria-label="Open menu" className="flex items-center p-1 text-ink dark:text-neutral-200">
@@ -59,9 +60,7 @@ export function MobileMenu({
             </button>
 
             <Link href="/profile" onClick={() => setOpen(false)} className="mb-2 block">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink/5 text-sm font-medium text-ink dark:bg-white/10 dark:text-neutral-100">
-                {initials}
-              </div>
+              <Avatar url={avatarUrl} name={displayName} size={48} />
               <p className="mt-2 text-sm font-medium text-ink dark:text-neutral-100">
                 {displayName ?? "Your profile"}
                 <VerifiedBadge verified={isVerified} />
