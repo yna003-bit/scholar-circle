@@ -13,7 +13,7 @@ export default async function FeedPage() {
   const { data: opportunities, error } = await supabase
     .from("opportunities")
     .select(
-      "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, profiles(display_name), likes(user_id), comments(id, body, user_id, profiles(display_name))"
+      "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, profiles!opportunities_author_id_fkey(display_name), likes(user_id), comments(id, body, user_id, profiles!comments_user_id_fkey(display_name))"
     )
     .order("created_at", { ascending: false });
 
