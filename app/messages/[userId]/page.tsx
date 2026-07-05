@@ -18,6 +18,14 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
     .eq("id", otherId)
     .single();
 
+  // Mark any messages the other person sent me as read now that I've opened this thread.
+  await supabase
+    .from("messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("sender_id", otherId)
+    .eq("receiver_id", user.id)
+    .is("read_at", null);
+
   const { data: messages } = await supabase
     .from("messages")
     .select("id, sender_id, receiver_id, body, created_at")
