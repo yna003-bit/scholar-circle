@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Avatar } from "@/components/Avatar";
+import { NotificationItem } from "@/components/NotificationItem";
 
 function labelFor(type: string, actorName: string, preview: string | null) {
   switch (type) {
@@ -58,21 +57,16 @@ export default async function NotificationsPage() {
       <h1 className="mb-4 text-lg font-medium">Notifications</h1>
       <div className="flex flex-col gap-1">
         {(notifications ?? []).map((n: any) => (
-          <Link
+          <NotificationItem
             key={n.id}
-            href={n.link}
-            className={`flex items-center gap-3 rounded-lg border border-black/10 p-3 dark:border-white/10 ${
-              n.read_at ? "bg-white dark:bg-neutral-900" : "bg-ink/5 dark:bg-white/5"
-            }`}
-          >
-            <Avatar url={n.profiles?.avatar_url} name={n.profiles?.display_name} size={36} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm text-ink dark:text-neutral-100">
-                {labelFor(n.type, n.profiles?.display_name ?? "Someone", n.preview)}
-              </p>
-              <p className="text-xs text-ink/40 dark:text-neutral-500">{timeAgo(n.created_at)}</p>
-            </div>
-          </Link>
+            id={n.id}
+            link={n.link}
+            avatarUrl={n.profiles?.avatar_url ?? null}
+            name={n.profiles?.display_name ?? null}
+            label={labelFor(n.type, n.profiles?.display_name ?? "Someone", n.preview)}
+            timeLabel={timeAgo(n.created_at)}
+            unread={!n.read_at}
+          />
         ))}
         {notifications?.length === 0 ? (
           <p className="text-sm text-ink/50 dark:text-neutral-400">No notifications yet.</p>
