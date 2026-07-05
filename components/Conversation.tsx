@@ -42,12 +42,24 @@ function MessageTicks({ message }: { message: Message }) {
 }
 
 function AttachmentContent({ message, isMine }: { message: Message; isMine: boolean }) {
+  if (message.attachment_type === "image" && message.attachment_url) {
+    return (
+      <a href={message.attachment_url} target="_blank" rel="noopener noreferrer">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={message.attachment_url}
+          alt=""
+          className="max-h-72 max-w-[260px] rounded-lg object-cover"
+        />
+      </a>
+    );
+  }
   if (message.attachment_type === "audio" && message.attachment_url) {
     return <audio controls src={message.attachment_url} className="max-w-[220px]" />;
   }
   if (message.attachment_type === "file" && message.attachment_url) {
     return (
-      <a
+      
         href={message.attachment_url}
         target="_blank"
         rel="noopener noreferrer"
@@ -338,12 +350,13 @@ export function Conversation({
       return;
     }
     const { data } = supabase.storage.from("message-attachments").getPublicUrl(path);
+    const isImage = file.type.startsWith("image/");
     await supabase.from("messages").insert({
       sender_id: userId,
       receiver_id: otherId,
-      body: `📎 ${file.name}`,
+      body: isImage ? "📷 Photo" : `📎 ${file.name}`,
       attachment_url: data.publicUrl,
-      attachment_type: "file",
+      attachment_type: isImage ? "image" : "file",
     });
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
