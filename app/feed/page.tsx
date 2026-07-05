@@ -10,6 +10,15 @@ export default async function FeedPage() {
 
   if (!user) redirect("/login");
 
+  const { data: blockRows } = await supabase
+    .from("blocks")
+    .select("blocker_id, blocked_id")
+    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+
+  const excludedIds = new Set(
+    (blockRows ?? []).map((b) => (b.blocker_id === user.id ? b.blocked_id : b.blocker_id))
+  );
+
   const { data: opportunities, error } = await supabase
     .from("opportunities")
     .select(
@@ -21,6 +30,8 @@ export default async function FeedPage() {
     console.error("Feed query error:", error);
   }
 
+  const visibleOpportunities = (opportunities ?? []).filter((o: any) => !excludedIds.has(o.author_id));
+
   return (
     <div>
       <h1 className="mb-4 text-lg font-medium">Scholarships &amp; Grants</h1>
@@ -28,10 +39,10 @@ export default async function FeedPage() {
       {error ? (
         <p className="text-sm text-red-600">Couldn&apos;t load the feed: {error.message}</p>
       ) : null}
-      {(opportunities ?? []).map((opp: any) => (
+      {visibleOpportunities.map((opp: any) => (
         <OpportunityCard key={opp.id} opp={opp} userId={user.id} />
       ))}
-      {!error && (opportunities ?? []).length === 0 ? (
+      {!error && visibleOpportunities.length === 0 ? (
         <p className="text-sm text-ink/50">No listings yet — be the first to post one.</p>
       ) : null}
     </div>

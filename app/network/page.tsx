@@ -15,10 +15,21 @@ export default async function NetworkPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profiles } = await supabase
+  const { data: blockRows } = await supabase
+    .from("blocks")
+    .select("blocker_id, blocked_id")
+    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+
+  const excludedIds = new Set(
+    (blockRows ?? []).map((b) => (b.blocker_id === user.id ? b.blocked_id : b.blocker_id))
+  );
+
+  const { data: allProfiles } = await supabase
     .from("profiles")
     .select("id, display_name, username, school, is_verified, avatar_url, last_seen_at")
     .neq("id", user.id);
+
+  const profiles = (allProfiles ?? []).filter((p) => !excludedIds.has(p.id));
 
   const { data: myFollowing } = await supabase
     .from("follows")
@@ -62,7 +73,7 @@ export default async function NetworkPage() {
         </Link>
       </div>
       <div className="flex flex-col gap-2">
-        {(profiles ?? []).map((p) => {
+        {profiles.map((p) => {
           const friend = friendStateFor(p.id);
           return (
             <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3">
@@ -97,7 +108,7 @@ export default async function NetworkPage() {
             </div>
           );
         })}
-        {profiles?.length === 0 ? <p className="text-sm text-ink/50">No other students yet.</p> : null}
+        {profiles.length === 0 ? <p className="text-sm text-ink/50">No other students yet.</p> : null}
       </div>
     </div>
   );

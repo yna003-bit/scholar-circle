@@ -5,6 +5,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VerifyToggle } from "@/components/VerifyToggle";
+import { BlockToggle } from "@/components/BlockToggle";
 import { Avatar } from "@/components/Avatar";
 import { isActiveNow, lastSeenLabel } from "@/lib/presence";
 
@@ -61,6 +62,13 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
     .or(
       `and(sender_id.eq.${user.id},receiver_id.eq.${profile.id}),and(sender_id.eq.${profile.id},receiver_id.eq.${user.id})`
     )
+    .maybeSingle();
+
+  const { data: myBlock } = await supabase
+    .from("blocks")
+    .select("blocker_id")
+    .eq("blocker_id", user.id)
+    .eq("blocked_id", profile.id)
     .maybeSingle();
 
   let friendStatus: "none" | "sent" | "received" | "friends" = "none";
@@ -124,6 +132,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         >
           Message
         </Link>
+        <BlockToggle userId={user.id} targetId={profile.id} initiallyBlocked={!!myBlock} />
         {viewer?.is_admin ? (
           <VerifyToggle targetId={profile.id} initiallyVerified={!!profile.is_verified} />
         ) : null}
