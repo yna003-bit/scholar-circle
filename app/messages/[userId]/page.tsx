@@ -12,9 +12,15 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
 
   const otherId = params.userId;
 
+  const { data: myProfile } = await supabase
+    .from("profiles")
+    .select("display_name, avatar_url")
+    .eq("id", user.id)
+    .single();
+
   const { data: otherProfile } = await supabase
     .from("profiles")
-    .select("display_name")
+    .select("display_name, avatar_url")
     .eq("id", otherId)
     .single();
 
@@ -28,19 +34,38 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
 
   const { data: messages } = await supabase
     .from("messages")
-    .select("id, sender_id, receiver_id, body, created_at")
+    .select(
+      "id, sender_id, receiver_id, body, created_at, delivered_at, read_at, edited_at, deleted_for_everyone, attachment_url, attachment_type"
+    )
     .or(
       `and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`
     )
     .order("created_at", { ascending: true });
+
+  const { data: hiddenRows } = await supabase
+    .from("message_deletions")
+    .select("message_id")
+    .eq("user_id", user.id);
+  const hiddenIds = new Set((hiddenRows ?? []).map((h) => h.message_id));
+
+  const visibleMessages = (messages ?? []).filter((m) => !hiddenIds.has(m.id));
 
   return (
     <div>
       <Link href="/messages" className="mb-4 inline-block text-xs text-ink/60 underline">
         &larr; Back to messages
       </Link>
-      <h1 className="mb-4 text-lg font-medium">{otherProfile?.display_name ?? "Conversation"}</h1>
-      <Conversation userId={user.id} otherId={otherId} initialMessages={messages ?? []} />
+      <h1 className="mb-1 text-lg font-medium">{otherProfile?.display_name ?? "Conversation"}</h1>
+      <p className="mb-4 text-xs text-ink/40 dark:text-neutral-500">
+        Messages are private between you and the recipient.
+      </p>
+      <Conversation
+        userId={user.id}
+        otherId={otherId}
+        initialMessages={visibleMessages}
+        myProfile={{ name: myProfile?.display_name ?? null, avatarUrl: myProfile?.avatar_url ?? null }}
+        otherProfile={{ name: otherProfile?.display_name ?? null, avatarUrl: otherProfile?.avatar_url ?? null }}
+      />
     </div>
   );
 }
