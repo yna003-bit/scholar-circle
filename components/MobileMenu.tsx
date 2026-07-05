@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers, Bookmark, BookOpen, UserPlus } from "lucide-react";
+import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut, Layers, Bookmark, BookOpen, UserPlus, Home } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
@@ -39,6 +39,7 @@ export function MobileMenu({
   }
 
   const items = [
+    { href: "/feed", label: "Home", Icon: Home },
     { href: "/network", label: t("network", lang), Icon: Users },
     { href: "/groups", label: t("groups", lang), Icon: Layers },
     { href: "/messages", label: t("messages", lang), Icon: MessageCircle },

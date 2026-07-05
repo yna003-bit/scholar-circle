@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { OpportunityCard, PostForm } from "@/components/FeedItems";
+import { SearchBar } from "@/components/SearchBar";
+import { LanguageCode } from "@/lib/translations";
 
 const OPP_FIELDS =
-  "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, created_at, image_url, profiles!opportunities_author_id_fkey(display_name, is_verified, avatar_url), likes(user_id), saved_posts(user_id), reposts(user_id), comments(id, body, user_id, profiles!comments_user_id_fkey(display_name, avatar_url), comment_likes(user_id))";
+  "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, created_at, image_url, profiles!opportunities_author_id_fkey(display_name, is_verified, avatar_url), likes(user_id), saved_posts(user_id), reposts(user_id), comments(id, body, user_id, profiles!comments_user_id_fkey(display_name), comment_likes(user_id))";
 
 export default async function FeedPage() {
   const supabase = createClient();
@@ -12,6 +15,9 @@ export default async function FeedPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  const cookieStore = cookies();
+  const lang = (cookieStore.get("lang")?.value ?? "en") as LanguageCode;
 
   const { data: viewer } = await supabase
     .from("profiles")
@@ -62,6 +68,9 @@ export default async function FeedPage() {
   return (
     <div>
       <h1 className="mb-4 text-lg font-medium">Scholarships &amp; Grants</h1>
+      <div className="mb-4">
+        <SearchBar lang={lang} />
+      </div>
       <PostForm userId={user.id} />
       {error ? (
         <p className="text-sm text-red-600">Couldn&apos;t load the feed: {error.message}</p>

@@ -2,7 +2,6 @@ import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { SearchBar } from "@/components/SearchBar";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Footer } from "@/components/Footer";
 import { PresenceHeartbeat } from "@/components/PresenceHeartbeat";
@@ -81,7 +80,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             {user ? (
               <>
-                <SearchBar lang={lang} />
                 <LanguageSwitcher current={lang} />
                 <NotificationBell userId={user.id} initialCount={unreadNotifications} />
                 <MobileMenu
