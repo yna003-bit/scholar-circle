@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { OpportunityCard, PostForm } from "@/components/FeedItems";
 
 const OPP_FIELDS =
-  "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, created_at, image_url, profiles!opportunities_author_id_fkey(display_name, is_verified, avatar_url), likes(user_id), saved_posts(user_id), reposts(user_id), comments(id, body, user_id, profiles!comments_user_id_fkey(display_name), comment_likes(user_id))";
+  "id, title, sponsor_name, amount, currency, deadline, description, tags, author_id, created_at, image_url, profiles!opportunities_author_id_fkey(display_name, is_verified, avatar_url), likes(user_id), saved_posts(user_id), reposts(user_id), comments(id, body, user_id, profiles!comments_user_id_fkey(display_name, avatar_url), comment_likes(user_id))";
 
 export default async function FeedPage() {
   const supabase = createClient();

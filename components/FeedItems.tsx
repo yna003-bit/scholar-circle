@@ -28,7 +28,7 @@ type Opportunity = {
     id: string;
     body: string;
     user_id: string;
-    profiles: { display_name: string } | null;
+    profiles: { display_name: string; avatar_url?: string | null } | null;
     comment_likes: { user_id: string }[];
   }[];
 };
@@ -498,24 +498,32 @@ export function OpportunityCard({
                 const commentLiked = c.comment_likes.some((l) => l.user_id === userId);
                 const canDelete = c.user_id === userId || isAuthor;
                 return (
-                  <div key={c.id} className="mb-2">
-                    <p className="text-xs text-ink/70 dark:text-neutral-300">
-                      <span className="font-medium">{c.profiles?.display_name ?? "Student"}:</span> {c.body}
-                    </p>
-                    <div className="mt-0.5 flex items-center gap-3 text-[11px] text-ink/40 dark:text-neutral-500">
-                      <button
-                        onClick={() => toggleCommentLike(c.id, commentLiked)}
-                        className={
-                          commentLiked ? "font-medium text-blue-600 dark:text-blue-400" : "hover:text-ink/70 dark:hover:text-neutral-300"
-                        }
-                      >
-                        Like{c.comment_likes.length > 0 ? ` (${c.comment_likes.length})` : ""}
-                      </button>
-                      {canDelete ? (
-                        <button onClick={() => deleteComment(c.id)} className="hover:text-red-600">
-                          Delete
+                  <div key={c.id} className="mb-2 flex gap-2">
+                    <Link href={`/profile/${c.user_id}`} className="shrink-0">
+                      <Avatar url={c.profiles?.avatar_url} name={c.profiles?.display_name} size={24} />
+                    </Link>
+                    <div className="flex-1">
+                      <p className="text-xs text-ink/70 dark:text-neutral-300">
+                        <Link href={`/profile/${c.user_id}`} className="font-medium hover:underline">
+                          {c.profiles?.display_name ?? "Student"}
+                        </Link>
+                        : {c.body}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-3 text-[11px] text-ink/40 dark:text-neutral-500">
+                        <button
+                          onClick={() => toggleCommentLike(c.id, commentLiked)}
+                          className={
+                            commentLiked ? "font-medium text-blue-600 dark:text-blue-400" : "hover:text-ink/70 dark:hover:text-neutral-300"
+                          }
+                        >
+                          Like{c.comment_likes.length > 0 ? ` (${c.comment_likes.length})` : ""}
                         </button>
-                      ) : null}
+                        {canDelete ? (
+                          <button onClick={() => deleteComment(c.id)} className="hover:text-red-600">
+                            Delete
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 );
