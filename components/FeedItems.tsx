@@ -4,7 +4,7 @@ import { useState, useRef, createElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark, Image as ImageIcon, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark, Image as ImageIcon, X, Repeat2 } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
 
@@ -23,6 +23,7 @@ type Opportunity = {
   profiles: { display_name: string; is_verified?: boolean; avatar_url?: string | null } | null;
   likes: { user_id: string }[];
   saved_posts: { user_id: string }[];
+  reposts: { user_id: string }[];
   comments: {
     id: string;
     body: string;
@@ -187,11 +188,22 @@ export function PostForm({ userId }: { userId: string }) {
   );
 }
 
-export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; userId: string; isAdmin?: boolean }) {
+export function OpportunityCard({
+  opp,
+  userId,
+  isAdmin,
+  repostedBy,
+}: {
+  opp: Opportunity;
+  userId: string;
+  isAdmin?: boolean;
+  repostedBy?: { id: string; name: string | null } | null;
+}) {
   const supabase = createClient();
   const router = useRouter();
   const liked = opp.likes.some((l) => l.user_id === userId);
   const saved = opp.saved_posts.some((s) => s.user_id === userId);
+  const reposted = opp.reposts.some((r) => r.user_id === userId);
   const isAuthor = opp.author_id === userId;
   const canDeletePost = isAuthor || !!isAdmin;
   const [commentBody, setCommentBody] = useState("");
@@ -225,6 +237,15 @@ export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; us
       await supabase.from("saved_posts").delete().match({ user_id: userId, opportunity_id: opp.id });
     } else {
       await supabase.from("saved_posts").insert({ user_id: userId, opportunity_id: opp.id });
+    }
+    router.refresh();
+  }
+
+  async function toggleRepost() {
+    if (reposted) {
+      await supabase.from("reposts").delete().match({ user_id: userId, opportunity_id: opp.id });
+    } else {
+      await supabase.from("reposts").insert({ user_id: userId, opportunity_id: opp.id });
     }
     router.refresh();
   }
@@ -340,6 +361,15 @@ export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; us
         </form>
       ) : (
         <>
+          {repostedBy ? (
+            <Link
+              href={`/profile/${repostedBy.id}`}
+              className="mb-2 flex items-center gap-1.5 text-xs text-ink/50 hover:underline dark:text-neutral-500"
+            >
+              <Repeat2 size={13} />
+              Reposted by {repostedBy.name ?? "a student"}
+            </Link>
+          ) : null}
           <div className="flex items-start justify-between gap-2">
             <Link href={`/profile/${opp.author_id}`} className="flex items-center gap-2.5">
               <Avatar url={opp.profiles?.avatar_url} name={opp.profiles?.display_name} size={36} />
@@ -413,7 +443,7 @@ export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; us
             <p className="mt-1 text-xs text-ink/50 dark:text-neutral-400">Deadline: {opp.deadline}</p>
           ) : null}
 
-          {opp.likes.length > 0 || opp.comments.length > 0 ? (
+          {opp.likes.length > 0 || opp.comments.length > 0 || opp.reposts.length > 0 ? (
             <p className="mt-3 text-xs text-ink/40 dark:text-neutral-500">
               {opp.likes.length > 0 ? `${opp.likes.length} likes` : ""}
               {opp.likes.length > 0 && opp.comments.length > 0 ? " · " : ""}
@@ -422,13 +452,15 @@ export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; us
                   {opp.comments.length} comments
                 </button>
               ) : null}
+              {(opp.likes.length > 0 || opp.comments.length > 0) && opp.reposts.length > 0 ? " · " : ""}
+              {opp.reposts.length > 0 ? `${opp.reposts.length} reposts` : ""}
             </p>
           ) : null}
 
-          <div className="mt-1 grid grid-cols-3 border-t border-black/10 pt-1 dark:border-white/10">
+          <div className="mt-1 grid grid-cols-4 border-t border-black/10 pt-1 dark:border-white/10">
             <button
               onClick={toggleLike}
-              className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 ${
                 liked ? "font-medium text-blue-600 dark:text-blue-400" : "text-ink/60 dark:text-neutral-400"
               }`}
             >
@@ -437,14 +469,23 @@ export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; us
             </button>
             <button
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center justify-center gap-2 rounded-lg py-2 text-sm text-ink/60 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/5"
+              className="flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm text-ink/60 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/5"
             >
               <MessageCircle size={16} />
               Comment
             </button>
             <button
+              onClick={toggleRepost}
+              className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 ${
+                reposted ? "font-medium text-green-600 dark:text-green-400" : "text-ink/60 dark:text-neutral-400"
+              }`}
+            >
+              <Repeat2 size={16} />
+              Repost
+            </button>
+            <button
               onClick={share}
-              className="flex items-center justify-center gap-2 rounded-lg py-2 text-sm text-ink/60 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/5"
+              className="flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm text-ink/60 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/5"
             >
               <Share2 size={16} />
               Share
