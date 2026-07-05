@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
 
@@ -22,13 +21,11 @@ export function NotificationItem({
   unread: boolean;
 }) {
   const supabase = createClient();
-  const router = useRouter();
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     await supabase.from("notifications").delete().eq("id", id);
-    router.push(link);
-    router.refresh();
+    window.location.href = link;
   }
 
   return (

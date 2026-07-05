@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -194,6 +194,12 @@ export function OpportunityCard({
   const canDeletePost = isAuthor || !!isAdmin;
   const [commentBody, setCommentBody] = useState("");
   const [showComments, setShowComments] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === `#${opp.id}`) {
+      setShowComments(true);
+    }
+  }, [opp.id]);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: opp.title, description: opp.description ?? "" });
