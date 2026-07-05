@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
-import { LandingSidebar } from "@/components/LandingSidebar";
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
 
 const display = Space_Grotesk({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-display" });
 const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
@@ -90,18 +91,7 @@ export default function WelcomePage() {
       />
 
       {/* Nav — no sign-in button up front, just the logo and the sidebar */}
-      <nav className="border-b border-slate-100">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/welcome" className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="Scholar Circle" className="h-8 w-8 rounded-lg" />
-            <span className="text-lg font-semibold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
-              Scholar Circle
-            </span>
-          </Link>
-          <LandingSidebar />
-        </div>
-      </nav>
+      <MarketingHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/60 via-white to-white">
@@ -503,21 +493,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100">
-        <div className="mx-auto max-w-6xl px-6 py-10">
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
-            <Link href="/about" className="hover:text-slate-800">About</Link>
-            <Link href="/privacy" className="hover:text-slate-800">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-slate-800">Terms of Use</Link>
-            <Link href="/accessibility" className="hover:text-slate-800">Accessibility Statement</Link>
-            <Link href="/help" className="hover:text-slate-800">Help Center</Link>
-            <Link href="/cookies" className="hover:text-slate-800">Cookies</Link>
-          </div>
-          <p className="mt-6 text-center text-xs text-slate-400">
-            Scholar Circle — Bringing opportunities closer to students.
-          </p>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }
