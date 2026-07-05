@@ -26,15 +26,14 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto mt-12 max-w-sm rounded-xl border border-black/10 bg-white p-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-ink/5 text-xl font-medium text-ink">
-        S
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.svg" alt="Scholar Circle" className="mx-auto mb-4 h-12 w-12" />
       <h1 className="text-lg font-medium">Scholar Circle</h1>
       <p className="text-sm text-ink/60">Find funding. Find your people.</p>
-<p className="mb-6 mt-2 text-xs text-ink/50">
-  Scholar Circle is a place for students to discover scholarships and sponsorships, and to
-  follow and connect with one another.
-</p>
+      <p className="mb-6 mt-2 text-xs text-ink/50">
+        Scholar Circle is a place for students to discover scholarships and sponsorships, and to
+        follow and connect with one another.
+      </p>
 
       <button
         onClick={signInWithGoogle}
@@ -63,7 +62,8 @@ export default function LoginPage() {
           </button>
         </form>
       )}
-       <p className="mt-6 text-xs text-ink/40">
+
+      <p className="mt-6 text-xs text-ink/40">
         <a href="/privacy" className="underline">
           Privacy Policy
         </a>
