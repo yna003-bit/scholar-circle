@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
+import { Check, CheckCheck } from "lucide-react";
 
 type Message = {
   id: string;
@@ -25,6 +26,12 @@ function formatTime(dateString: string) {
   return new Date(dateString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function MessageTicks({ message }: { message: Message }) {
+  if (message.read_at) return <CheckCheck size={13} className="text-blue-400" />;
+  if (message.delivered_at) return <CheckCheck size={13} className="text-white/60" />;
+  return <Check size={13} className="text-white/60" />;
+}
+
 export function Conversation({
   userId,
   otherId,
@@ -41,12 +48,17 @@ export function Conversation({
   const supabase = createClient();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
+  const [otherTyping, setOtherTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const channelName = `conversation-${[userId, otherId].sort().join("-")}`;
 
   useEffect(() => {
     const channel = supabase
-      .channel(`messages-${userId}-${otherId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
@@ -55,21 +67,56 @@ export function Conversation({
           const belongs =
             (m.sender_id === userId && m.receiver_id === otherId) ||
             (m.sender_id === otherId && m.receiver_id === userId);
-          if (belongs) {
-            setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]));
+          if (!belongs) return;
+
+          setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]));
+
+          // If this message just arrived live and I'm the recipient, my client has
+          // now received it (delivered) and I'm actively viewing this thread (read).
+          if (m.receiver_id === userId) {
+            supabase
+              .from("messages")
+              .update({ delivered_at: new Date().toISOString(), read_at: new Date().toISOString() })
+              .eq("id", m.id)
+              .then();
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => {
+          const m = payload.new as Message;
+          setMessages((prev) => prev.map((p) => (p.id === m.id ? { ...p, ...m } : p)));
+        }
+      )
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.userId === otherId) {
+          setOtherTyping(true);
+          if (typingTimeout.current) clearTimeout(typingTimeout.current);
+          typingTimeout.current = setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
       .subscribe();
+
+    channelRef.current = channel;
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, otherId, supabase]);
+  }, [userId, otherId, channelName, supabase]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, otherTyping]);
+
+  function broadcastTyping() {
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId },
+    });
+  }
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -111,11 +158,12 @@ export function Conversation({
                   </div>
                 ) : (
                   <div
-                    className={`rounded-lg px-3 py-2 text-sm ${
+                    className={`flex items-end gap-1.5 rounded-lg px-3 py-2 text-sm ${
                       isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
                     }`}
                   >
-                    {m.body}
+                    <span>{m.body}</span>
+                    {isMine ? <MessageTicks message={m} /> : null}
                   </div>
                 )}
                 <div className="mt-0.5 flex items-center gap-1 text-[10px] text-ink/40 dark:text-neutral-500">
@@ -134,6 +182,11 @@ export function Conversation({
         {messages.length === 0 ? (
           <p className="relative text-sm text-ink/50 dark:text-neutral-400">No messages yet — say hello.</p>
         ) : null}
+        {otherTyping ? (
+          <p className="relative text-xs italic text-ink/40 dark:text-neutral-500">
+            {otherProfile.name ?? "They"} {otherProfile.name ? "is" : "are"} typing...
+          </p>
+        ) : null}
         <div ref={bottomRef} />
       </div>
 
@@ -145,6 +198,7 @@ export function Conversation({
             setBody(e.target.value);
             e.target.style.height = "auto";
             e.target.style.height = `${e.target.scrollHeight}px`;
+            broadcastTyping();
           }}
           placeholder="Write a message"
           rows={1}
