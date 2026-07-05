@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
-import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon } from "lucide-react";
+import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText } from "lucide-react";
 
 type Message = {
   id: string;
@@ -51,6 +51,23 @@ function AttachmentContent({ message, isMine }: { message: Message; isMine: bool
           alt=""
           className="max-h-72 max-w-[260px] rounded-lg object-cover"
         />
+      </a>
+    );
+  }
+  if (message.attachment_type === "pdf" && message.attachment_url) {
+    return (
+      <a
+        href={message.attachment_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm underline ${
+          isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
+        }`}
+      >
+        <FileText size={16} />
+        <span>
+          PDF · {fileNameFromUrl(message.attachment_url)}
+        </span>
       </a>
     );
   }
@@ -351,12 +368,13 @@ export function Conversation({
     }
     const { data } = supabase.storage.from("message-attachments").getPublicUrl(path);
     const isImage = file.type.startsWith("image/");
+    const isPdf = file.type === "application/pdf";
     await supabase.from("messages").insert({
       sender_id: userId,
       receiver_id: otherId,
-      body: isImage ? "📷 Photo" : `📎 ${file.name}`,
+      body: isImage ? "📷 Photo" : isPdf ? `📄 ${file.name}` : `📎 ${file.name}`,
       attachment_url: data.publicUrl,
-      attachment_type: isImage ? "image" : "file",
+      attachment_type: isImage ? "image" : isPdf ? "pdf" : "file",
     });
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
