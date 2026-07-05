@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef, createElement } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark, Image as ImageIcon, X, Repeat2 } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
-import { notify } from "@/lib/notifications";
+import { notify, notifyTags } from "@/lib/notifications";
+import { renderRichText } from "@/lib/richText";
 
 type Opportunity = {
   id: string;
@@ -51,29 +52,6 @@ function initials(name: string | undefined | null) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function linkify(text: string) {
-  const urlRegex = /((?:https?:\/\/|www\.)[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  return parts.map((part, i) => {
-    if (!part) return null;
-    if (/^(?:https?:\/\/|www\.)/.test(part)) {
-      const href = part.startsWith("http") ? part : `https://${part}`;
-      return createElement(
-        "a",
-        {
-          key: i,
-          href: href,
-          target: "_blank",
-          rel: "noopener noreferrer",
-          className: "break-all text-blue-600 underline dark:text-blue-400",
-        },
-        part
-      );
-    }
-    return <span key={i}>{part}</span>;
-  });
-}
-
 async function uploadPostImage(
   supabase: ReturnType<typeof createClient>,
   userId: string,
@@ -109,12 +87,19 @@ export function PostForm({ userId }: { userId: string }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    await supabase.from("opportunities").insert({
-      author_id: userId,
-      title: form.title,
-      description: form.description,
-      image_url: imageUrl,
-    });
+    const { data: created } = await supabase
+      .from("opportunities")
+      .insert({
+        author_id: userId,
+        title: form.title,
+        description: form.description,
+        image_url: imageUrl,
+      })
+      .select()
+      .single();
+    if (created) {
+      notifyTags({ text: `${form.title} ${form.description}`, actorId: userId, link: `/feed#${created.id}` });
+    }
     setForm({ title: "", description: "" });
     setImageUrl(null);
     setOpen(false);
@@ -275,6 +260,7 @@ export function OpportunityCard({
       link: `/feed#${opp.id}`,
       preview: commentBody.slice(0, 80),
     });
+    notifyTags({ text: commentBody, actorId: userId, link: `/feed#${opp.id}` });
     setCommentBody("");
     if (commentInputRef.current) commentInputRef.current.style.height = "auto";
     router.refresh();
@@ -448,7 +434,7 @@ export function OpportunityCard({
 
           {opp.description ? (
             <p className="mt-2 whitespace-pre-wrap text-sm text-ink/70 dark:text-neutral-300">
-              {linkify(opp.description)}
+              {renderRichText(opp.description)}
             </p>
           ) : null}
 
@@ -529,7 +515,7 @@ export function OpportunityCard({
                         <Link href={`/profile/${c.user_id}`} className="font-medium hover:underline">
                           {c.profiles?.display_name ?? "Student"}
                         </Link>
-                        : {c.body}
+                        : {renderRichText(c.body)}
                       </p>
                       <div className="mt-0.5 flex items-center gap-3 text-[11px] text-ink/40 dark:text-neutral-500">
                         <button

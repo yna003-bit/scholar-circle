@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
 import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText } from "lucide-react";
-import { notify } from "@/lib/notifications";
+import { notify, notifyTags } from "@/lib/notifications";
+import { renderRichText } from "@/lib/richText";
 
 type Message = {
   id: string;
@@ -219,7 +220,7 @@ function MessageBubble({
               isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
             }`}
           >
-            <span>{message.body}</span>
+            <span>{renderRichText(message.body)}</span>
             {isMine ? <MessageTicks message={message} /> : null}
           </div>
         )}
@@ -341,6 +342,7 @@ export function Conversation({
       link: `/messages/${userId}`,
       preview: text.slice(0, 80),
     });
+    notifyTags({ text, actorId: userId, link: `/messages/${userId}` });
   }
 
   async function handleEdit(id: string, newBody: string) {

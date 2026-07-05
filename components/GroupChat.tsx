@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { notifyTags } from "@/lib/notifications";
+import { renderRichText } from "@/lib/richText";
 
 type GroupMessage = {
   id: string;
@@ -56,6 +58,7 @@ export function GroupChat({
     const text = body;
     setBody("");
     await supabase.from("group_messages").insert({ group_id: groupId, sender_id: userId, body: text });
+    notifyTags({ text, actorId: userId, link: `/groups/${groupId}` });
   }
 
   return (
@@ -72,7 +75,7 @@ export function GroupChat({
                   m.sender_id === userId ? "bg-ink text-white" : "bg-black/5 text-ink"
                 }`}
               >
-                {m.body}
+                {renderRichText(m.body)}
               </div>
             </div>
           </div>
