@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
-import { Check, CheckCheck, MoreVertical } from "lucide-react";
+import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon } from "lucide-react";
 
 type Message = {
   id: string;
@@ -28,10 +28,39 @@ function formatTime(dateString: string) {
   return new Date(dateString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function fileNameFromUrl(url: string) {
+  const parts = url.split("/");
+  const last = parts[parts.length - 1] ?? "file";
+  const dashIndex = last.indexOf("-");
+  return dashIndex >= 0 ? last.slice(dashIndex + 1) : last;
+}
+
 function MessageTicks({ message }: { message: Message }) {
   if (message.read_at) return <CheckCheck size={13} className="text-blue-400" />;
   if (message.delivered_at) return <CheckCheck size={13} className="text-white/60" />;
   return <Check size={13} className="text-white/60" />;
+}
+
+function AttachmentContent({ message, isMine }: { message: Message; isMine: boolean }) {
+  if (message.attachment_type === "audio" && message.attachment_url) {
+    return <audio controls src={message.attachment_url} className="max-w-[220px]" />;
+  }
+  if (message.attachment_type === "file" && message.attachment_url) {
+    return (
+      
+        href={message.attachment_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm underline ${
+          isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
+        }`}
+      >
+        <FileIcon size={16} />
+        {fileNameFromUrl(message.attachment_url)}
+      </a>
+    );
+  }
+  return null;
 }
 
 function MessageBubble({
@@ -58,6 +87,7 @@ function MessageBubble({
   const canEdit =
     isMine &&
     !message.deleted_for_everyone &&
+    !message.attachment_url &&
     Date.now() - new Date(message.created_at).getTime() < EDIT_WINDOW_MS;
 
   function saveEdit(e: React.FormEvent) {
@@ -76,82 +106,57 @@ function MessageBubble({
       ) : null}
       <div className={`group flex max-w-[75%] flex-col ${isMine ? "items-end" : "items-start"}`}>
         <div className="flex items-center gap-1">
-          {isMine ? (
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                aria-label="Message options"
-                className="opacity-0 transition-opacity group-hover:opacity-100 text-ink/40 hover:text-ink/70 dark:text-neutral-500"
-              >
-                <MoreVertical size={14} />
-              </button>
-              {menuOpen ? (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 z-20 mt-1 w-36 rounded-lg border border-black/10 bg-white py-1 text-xs shadow-sm dark:border-white/10 dark:bg-neutral-800">
-                    {canEdit ? (
-                      <button
-                        onClick={() => {
-                          setEditing(true);
-                          setMenuOpen(false);
-                        }}
-                        className="block w-full px-3 py-1.5 text-left hover:bg-black/5 dark:hover:bg-white/5"
-                      >
-                        Edit
-                      </button>
-                    ) : null}
-                    {!message.deleted_for_everyone ? (
-                      <button
-                        onClick={() => {
-                          setMenuOpen(false);
-                          onDeleteForEveryone(message.id);
-                        }}
-                        className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-black/5 dark:hover:bg-white/5"
-                      >
-                        Delete for everyone
-                      </button>
-                    ) : null}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Message options"
+              className="opacity-0 transition-opacity group-hover:opacity-100 text-ink/40 hover:text-ink/70 dark:text-neutral-500"
+            >
+              <MoreVertical size={14} />
+            </button>
+            {menuOpen ? (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div
+                  className={`absolute z-20 mt-1 w-36 rounded-lg border border-black/10 bg-white py-1 text-xs shadow-sm dark:border-white/10 dark:bg-neutral-800 ${
+                    isMine ? "right-0" : "left-0"
+                  }`}
+                >
+                  {canEdit ? (
                     <button
                       onClick={() => {
+                        setEditing(true);
                         setMenuOpen(false);
-                        onDeleteForMe(message.id);
                       }}
                       className="block w-full px-3 py-1.5 text-left hover:bg-black/5 dark:hover:bg-white/5"
                     >
-                      Delete for me
+                      Edit
                     </button>
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ) : null}
-          {!isMine ? (
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                aria-label="Message options"
-                className="opacity-0 transition-opacity group-hover:opacity-100 text-ink/40 hover:text-ink/70 dark:text-neutral-500"
-              >
-                <MoreVertical size={14} />
-              </button>
-              {menuOpen ? (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute left-0 z-20 mt-1 w-36 rounded-lg border border-black/10 bg-white py-1 text-xs shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                  ) : null}
+                  {isMine && !message.deleted_for_everyone ? (
                     <button
                       onClick={() => {
                         setMenuOpen(false);
-                        onDeleteForMe(message.id);
+                        onDeleteForEveryone(message.id);
                       }}
-                      className="block w-full px-3 py-1.5 text-left hover:bg-black/5 dark:hover:bg-white/5"
+                      className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-black/5 dark:hover:bg-white/5"
                     >
-                      Delete for me
+                      Delete for everyone
                     </button>
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ) : null}
+                  ) : null}
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onDeleteForMe(message.id);
+                    }}
+                    className="block w-full px-3 py-1.5 text-left hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    Delete for me
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
 
         {editing ? (
@@ -176,6 +181,8 @@ function MessageBubble({
           <div className="rounded-lg bg-black/5 px-3 py-2 text-sm italic text-ink/40 dark:bg-white/5 dark:text-neutral-500">
             This message was deleted
           </div>
+        ) : message.attachment_url ? (
+          <AttachmentContent message={message} isMine={isMine} />
         ) : (
           <div
             className={`flex items-end gap-1.5 rounded-lg px-3 py-2 text-sm ${
@@ -218,10 +225,15 @@ export function Conversation({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
   const [otherTyping, setOtherTyping] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const channelName = `conversation-${[userId, otherId].sort().join("-")}`;
 
@@ -313,6 +325,72 @@ export function Conversation({
     setMessages((prev) => prev.filter((m) => m.id !== id));
   }
 
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "");
+    const path = `${userId}/${Date.now()}-${safeName}`;
+    const { error } = await supabase.storage.from("message-attachments").upload(path, file);
+    if (error) {
+      setUploading(false);
+      alert("Couldn't upload file: " + error.message);
+      return;
+    }
+    const { data } = supabase.storage.from("message-attachments").getPublicUrl(path);
+    await supabase.from("messages").insert({
+      sender_id: userId,
+      receiver_id: otherId,
+      body: `📎 ${file.name}`,
+      attachment_url: data.publicUrl,
+      attachment_type: "file",
+    });
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setUploading(true);
+        const path = `${userId}/${Date.now()}-voice-message.webm`;
+        const { error } = await supabase.storage.from("message-attachments").upload(path, blob);
+        if (error) {
+          setUploading(false);
+          alert("Couldn't upload voice message: " + error.message);
+          return;
+        }
+        const { data } = supabase.storage.from("message-attachments").getPublicUrl(path);
+        await supabase.from("messages").insert({
+          sender_id: userId,
+          receiver_id: otherId,
+          body: "🎤 Voice message",
+          attachment_url: data.publicUrl,
+          attachment_type: "audio",
+        });
+        setUploading(false);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      alert("Couldn't access your microphone. Check your browser's microphone permissions.");
+    }
+  }
+
+  function stopRecording() {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  }
+
   return (
     <div className="relative flex h-[70vh] flex-col overflow-hidden rounded-lg border border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
       <div
@@ -354,7 +432,18 @@ export function Conversation({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={send} className="relative flex gap-2 border-t border-black/10 p-3 dark:border-white/10">
+      <form onSubmit={send} className="relative flex items-end gap-2 border-t border-black/10 p-3 dark:border-white/10">
+        <input ref={fileInputRef} type="file" onChange={handleFileSelect} disabled={uploading} className="hidden" />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading || isRecording}
+          aria-label="Attach file"
+          className="mb-1 shrink-0 text-ink/50 hover:text-ink/80 dark:text-neutral-400"
+        >
+          <Paperclip size={19} />
+        </button>
+
         <textarea
           ref={textareaRef}
           value={body}
@@ -364,13 +453,28 @@ export function Conversation({
             e.target.style.height = `${e.target.scrollHeight}px`;
             broadcastTyping();
           }}
-          placeholder="Write a message"
+          placeholder={isRecording ? "Recording..." : "Write a message"}
           rows={1}
-          className="min-h-[38px] max-h-32 flex-1 resize-none overflow-y-auto rounded-lg border border-black/15 px-3 py-2 text-sm"
+          disabled={isRecording}
+          className="min-h-[38px] max-h-32 flex-1 resize-none overflow-y-auto rounded-lg border border-black/15 px-3 py-2 text-sm disabled:opacity-50"
         />
+
+        <button
+          type="button"
+          onClick={isRecording ? stopRecording : startRecording}
+          disabled={uploading}
+          aria-label={isRecording ? "Stop recording" : "Record voice message"}
+          className={`mb-1 shrink-0 rounded-full p-1.5 ${
+            isRecording ? "bg-red-600 text-white" : "text-ink/50 hover:text-ink/80 dark:text-neutral-400"
+          }`}
+        >
+          {isRecording ? <Square size={16} /> : <Mic size={19} />}
+        </button>
+
         <button
           type="submit"
-          className="h-fit self-end rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white"
+          disabled={isRecording || uploading}
+          className="h-fit self-end rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           Send
         </button>
