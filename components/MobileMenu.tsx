@@ -77,12 +77,12 @@ export function MobileMenu({
               ) : null}
             </Link>
             <div className="mb-3 flex gap-3 text-xs text-ink/60 dark:text-neutral-400">
-              <span>
+              <Link href="/following" onClick={() => setOpen(false)} className="hover:underline">
                 <span className="font-medium text-ink dark:text-neutral-100">{followingCount}</span> {t("following", lang)}
-              </span>
-              <span>
+              </Link>
+              <Link href="/followers" onClick={() => setOpen(false)} className="hover:underline">
                 <span className="font-medium text-ink dark:text-neutral-100">{followerCount}</span> {t("followers", lang)}
-              </span>
+              </Link>
             </div>
 
             <div className="border-t border-black/10 pt-2 dark:border-white/10" />
