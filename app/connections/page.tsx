@@ -1,6 +1,6 @@
 export default function ConnectionsPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-lg font-medium">Scholar Circle for Making Connections</h1>
       <p className="mt-4 text-sm text-ink/80">
         Looking for funding alone is harder than it needs to be. Scholar Circle is built so you can

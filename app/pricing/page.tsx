@@ -1,6 +1,6 @@
 export default function PricingPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-lg font-medium">Pricing</h1>
       <p className="mt-4 text-sm text-ink/80">
         Scholar Circle is free for students. There are no paid tiers, subscriptions, or hidden
