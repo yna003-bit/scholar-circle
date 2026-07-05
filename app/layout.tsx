@@ -7,6 +7,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { Footer } from "@/components/Footer";
 import { PresenceHeartbeat } from "@/components/PresenceHeartbeat";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { NotificationBell } from "@/components/NotificationBell";
 import { LanguageCode } from "@/lib/translations";
 
 export const metadata = {
@@ -26,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let menuProfile = null;
   let followingCount = 0;
   let followerCount = 0;
+  let unreadNotifications = 0;
 
   if (user) {
     const { data: profile } = await supabase
@@ -46,6 +48,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .select("follower_id", { count: "exact", head: true })
       .eq("followed_id", user.id);
     followerCount = flc ?? 0;
+
+    const { count: nc } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .is("read_at", null);
+    unreadNotifications = nc ?? 0;
   }
 
   return (
@@ -74,6 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <>
                 <SearchBar lang={lang} />
                 <LanguageSwitcher current={lang} />
+                <NotificationBell userId={user.id} initialCount={unreadNotifications} />
                 <MobileMenu
                   displayName={menuProfile?.display_name ?? null}
                   username={menuProfile?.username ?? null}
