@@ -8,6 +8,7 @@ import { Menu, X, Users, MessageCircle, User, LayoutDashboard, Settings, LogOut,
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
+import { t, LanguageCode } from "@/lib/translations";
 
 export function MobileMenu({
   displayName,
@@ -16,6 +17,7 @@ export function MobileMenu({
   avatarUrl,
   followingCount,
   followerCount,
+  lang,
 }: {
   displayName: string | null;
   username: string | null;
@@ -23,6 +25,7 @@ export function MobileMenu({
   avatarUrl?: string | null;
   followingCount: number;
   followerCount: number;
+  lang: LanguageCode;
 }) {
   const [open, setOpen] = useState(false);
   const supabase = createClient();
@@ -36,14 +39,14 @@ export function MobileMenu({
   }
 
   const items = [
-    { href: "/network", label: "Network", Icon: Users },
-    { href: "/groups", label: "Groups", Icon: Layers },
-    { href: "/messages", label: "Messages", Icon: MessageCircle },
-    { href: "/saved", label: "Saved", Icon: Bookmark },
-    { href: "/requirements", label: "Requirements", Icon: BookOpen },
-    { href: "/profile", label: "Profile", Icon: User },
-    { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-    { href: "/settings", label: "Settings", Icon: Settings },
+    { href: "/network", label: t("network", lang), Icon: Users },
+    { href: "/groups", label: t("groups", lang), Icon: Layers },
+    { href: "/messages", label: t("messages", lang), Icon: MessageCircle },
+    { href: "/saved", label: t("saved", lang), Icon: Bookmark },
+    { href: "/requirements", label: t("requirements", lang), Icon: BookOpen },
+    { href: "/profile", label: t("profile", lang), Icon: User },
+    { href: "/dashboard", label: t("dashboard", lang), Icon: LayoutDashboard },
+    { href: "/settings", label: t("settings", lang), Icon: Settings },
   ];
 
   return (
@@ -72,10 +75,10 @@ export function MobileMenu({
             </Link>
             <div className="mb-3 flex gap-3 text-xs text-ink/60 dark:text-neutral-400">
               <span>
-                <span className="font-medium text-ink dark:text-neutral-100">{followingCount}</span> Following
+                <span className="font-medium text-ink dark:text-neutral-100">{followingCount}</span> {t("following", lang)}
               </span>
               <span>
-                <span className="font-medium text-ink dark:text-neutral-100">{followerCount}</span> Followers
+                <span className="font-medium text-ink dark:text-neutral-100">{followerCount}</span> {t("followers", lang)}
               </span>
             </div>
 
@@ -93,14 +96,14 @@ export function MobileMenu({
                   {label}
                 </Link>
               ))}
-              <ThemeToggle />
+              <ThemeToggle lang={lang} />
               <div className="my-2 border-t border-black/10 dark:border-white/10" />
               <button
                 onClick={signOut}
                 className="flex items-center gap-3 rounded-lg px-2 py-2 text-left text-sm text-red-600 hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <LogOut size={17} />
-                Sign out
+                {t("signOut", lang)}
               </button>
             </div>
           </div>

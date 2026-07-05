@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+import { t, LanguageCode } from "@/lib/translations";
 
-export function ThemeToggle() {
+export function ThemeToggle({ lang }: { lang: LanguageCode }) {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export function ThemeToggle() {
       ) : (
         <Moon size={17} className="text-ink/60" />
       )}
-      {dark ? "Light mode" : "Dark mode"}
+      {dark ? t("lightMode", lang) : t("darkMode", lang)}
     </button>
   );
 }

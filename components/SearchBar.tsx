@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Search } from "lucide-react";
+import { t, LanguageCode } from "@/lib/translations";
 
 type PersonResult = { id: string; display_name: string; username: string | null };
 type PostResult = { id: string; title: string; sponsor_name: string };
@@ -12,7 +13,7 @@ function safe(term: string) {
   return term.replace(/[,()%_]/g, "").trim();
 }
 
-export function SearchBar() {
+export function SearchBar({ lang }: { lang: LanguageCode }) {
   const supabase = createClient();
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -75,42 +76,46 @@ export function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search posts or people"
+          placeholder={t("searchPlaceholder", lang)}
           className="w-full border-none bg-transparent p-0 text-sm outline-none"
         />
       </div>
       {open ? (
-        <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-72 overflow-y-auto rounded-lg border border-black/10 bg-white shadow-sm">
+        <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-72 overflow-y-auto rounded-lg border border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-neutral-900">
           {!hasResults ? (
-            <p className="p-3 text-xs text-ink/50">No results.</p>
+            <p className="p-3 text-xs text-ink/50 dark:text-neutral-400">{t("noResults", lang)}</p>
           ) : (
             <>
               {people.length > 0 ? (
                 <div>
-                  <p className="px-3 pt-2 text-[11px] font-medium uppercase text-ink/40">People</p>
+                  <p className="px-3 pt-2 text-[11px] font-medium uppercase text-ink/40 dark:text-neutral-500">
+                    {t("peopleLabel", lang)}
+                  </p>
                   {people.map((p) => (
                     <button
                       key={p.id}
                       onMouseDown={() => goToPerson(p.id)}
-                      className="block w-full px-3 py-2 text-left text-sm hover:bg-black/5"
+                      className="block w-full px-3 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       {p.display_name}
-                      {p.username ? <span className="ml-1 text-xs text-ink/40">@{p.username}</span> : null}
+                      {p.username ? <span className="ml-1 text-xs text-ink/40 dark:text-neutral-500">@{p.username}</span> : null}
                     </button>
                   ))}
                 </div>
               ) : null}
               {posts.length > 0 ? (
                 <div>
-                  <p className="px-3 pt-2 text-[11px] font-medium uppercase text-ink/40">Scholarships</p>
+                  <p className="px-3 pt-2 text-[11px] font-medium uppercase text-ink/40 dark:text-neutral-500">
+                    {t("scholarshipsLabel", lang)}
+                  </p>
                   {posts.map((o) => (
                     <button
                       key={o.id}
                       onMouseDown={() => goToPost(o.id)}
-                      className="block w-full px-3 py-2 text-left text-sm hover:bg-black/5"
+                      className="block w-full px-3 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       {o.title}
-                      <span className="ml-1 text-xs text-ink/40">{o.sponsor_name}</span>
+                      <span className="ml-1 text-xs text-ink/40 dark:text-neutral-500">{o.sponsor_name}</span>
                     </button>
                   ))}
                 </div>

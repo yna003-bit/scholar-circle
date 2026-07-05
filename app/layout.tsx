@@ -1,10 +1,13 @@
 import "./globals.css";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { SearchBar } from "@/components/SearchBar";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Footer } from "@/components/Footer";
 import { PresenceHeartbeat } from "@/components/PresenceHeartbeat";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LanguageCode } from "@/lib/translations";
 
 export const metadata = {
   title: "Scholar Circle",
@@ -16,6 +19,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const cookieStore = cookies();
+  const lang = (cookieStore.get("lang")?.value ?? "en") as LanguageCode;
 
   let menuProfile = null;
   let followingCount = 0;
@@ -66,7 +72,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             {user ? (
               <>
-                <SearchBar />
+                <SearchBar lang={lang} />
+                <LanguageSwitcher current={lang} />
                 <MobileMenu
                   displayName={menuProfile?.display_name ?? null}
                   username={menuProfile?.username ?? null}
@@ -74,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   avatarUrl={menuProfile?.avatar_url ?? null}
                   followingCount={followingCount}
                   followerCount={followerCount}
+                  lang={lang}
                 />
               </>
             ) : null}
