@@ -1,6 +1,11 @@
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
+
 export default function PrivacyPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <>
+      <MarketingHeader />
+      <div className="prose prose-sm mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-lg font-medium">Privacy Policy</h1>
       <p className="text-xs text-ink/50">Last updated: July 2026</p>
 
@@ -35,16 +40,6 @@ export default function PrivacyPage() {
         other third party.
       </p>
 
-      <h2 className="mt-6 text-sm font-medium">Cookies</h2>
-      <p className="text-sm text-ink/80">
-        We use one essential cookie to keep you signed in between visits. It doesn&apos;t track
-        you across other websites and isn&apos;t used for advertising. See our{" "}
-        <a href="/cookies" className="underline">
-          Cookies page
-        </a>{" "}
-        for details.
-      </p>
-
       <h2 className="mt-6 text-sm font-medium">Data storage and protection</h2>
       <p className="text-sm text-ink/80">
         Data is stored in a Postgres database managed by Supabase, protected by row-level security
@@ -74,6 +69,8 @@ export default function PrivacyPage() {
         </a>
         .
       </p>
-    </div>
+      </div>
+      <MarketingFooter />
+    </>
   );
 }

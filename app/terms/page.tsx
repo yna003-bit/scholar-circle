@@ -1,6 +1,11 @@
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
+
 export default function TermsPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <>
+      <MarketingHeader />
+      <div className="prose prose-sm mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-lg font-medium">Terms of use</h1>
       <p className="text-xs text-ink/50">Last updated: July 2026</p>
 
@@ -58,6 +63,8 @@ export default function TermsPage() {
         </a>
         .
       </p>
-    </div>
+      </div>
+      <MarketingFooter />
+    </>
   );
 }

@@ -1,6 +1,11 @@
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
+
 export default function HelpPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <>
+      <MarketingHeader />
+      <div className="prose prose-sm mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-lg font-medium">Help center</h1>
 
       <h2 className="mt-6 text-sm font-medium">FAQs</h2>
@@ -74,6 +79,8 @@ export default function HelpPage() {
         </a>{" "}
         with what happened and, if possible, a screenshot.
       </p>
-    </div>
+      </div>
+      <MarketingFooter />
+    </>
   );
 }

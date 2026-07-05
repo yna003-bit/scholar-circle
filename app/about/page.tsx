@@ -1,6 +1,11 @@
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
+
 export default function AboutPage() {
   return (
-    <div className="prose prose-sm max-w-none">
+    <>
+      <MarketingHeader />
+      <div className="prose prose-sm mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-lg font-medium">About Scholar Circle</h1>
 
       <p className="mt-4 text-sm text-ink/80">
@@ -32,6 +37,8 @@ export default function AboutPage() {
       </p>
 
       <p className="mt-8 text-xs text-ink/40">© 2026 Scholar Circle. All rights reserved.</p>
-    </div>
+      </div>
+      <MarketingFooter />
+    </>
   );
 }
