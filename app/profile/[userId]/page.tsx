@@ -6,6 +6,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VerifyToggle } from "@/components/VerifyToggle";
 import { BlockToggle } from "@/components/BlockToggle";
+import { SuspendToggle } from "@/components/SuspendToggle";
 import { Avatar } from "@/components/Avatar";
 import { isActiveNow, lastSeenLabel } from "@/lib/presence";
 
@@ -28,7 +29,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at")
+    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at, is_suspended")
     .eq("id", params.userId)
     .single();
 
@@ -135,6 +136,9 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
         <BlockToggle userId={user.id} targetId={profile.id} initiallyBlocked={!!myBlock} />
         {viewer?.is_admin ? (
           <VerifyToggle targetId={profile.id} initiallyVerified={!!profile.is_verified} />
+        ) : null}
+        {viewer?.is_admin ? (
+          <SuspendToggle targetId={profile.id} initiallySuspended={!!profile.is_suspended} />
         ) : null}
       </div>
     </div>

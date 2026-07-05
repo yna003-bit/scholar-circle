@@ -22,7 +22,23 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
+
+  if (user && path !== "/suspended") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_suspended")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.is_suspended) {
+      return NextResponse.redirect(new URL("/suspended", request.url));
+    }
+  }
 
   return response;
 }
