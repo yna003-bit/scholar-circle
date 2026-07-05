@@ -32,7 +32,7 @@ export function NotificationItem({
   }
 
   return (
-    
+    <a
       href={link}
       onClick={handleClick}
       className={`flex items-center gap-3 rounded-lg border border-black/10 p-3 dark:border-white/10 ${
