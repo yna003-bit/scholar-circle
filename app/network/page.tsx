@@ -5,6 +5,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
+import { isActiveNow, lastSeenLabel } from "@/lib/presence";
 
 export default async function NetworkPage() {
   const supabase = createClient();
@@ -16,7 +17,7 @@ export default async function NetworkPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, is_verified, avatar_url")
+    .select("id, display_name, username, school, is_verified, avatar_url, last_seen_at")
     .neq("id", user.id);
 
   const { data: myFollowing } = await supabase
@@ -66,7 +67,7 @@ export default async function NetworkPage() {
           return (
             <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3">
               <Link href={`/profile/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-                <Avatar url={p.avatar_url} name={p.display_name} size={36} />
+                <Avatar url={p.avatar_url} name={p.display_name} size={36} active={isActiveNow(p.last_seen_at)} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium hover:underline">
                     {p.display_name}
@@ -74,7 +75,7 @@ export default async function NetworkPage() {
                     {p.username ? <span className="ml-1 text-xs font-normal text-ink/40">@{p.username}</span> : null}
                   </p>
                   <p className="truncate text-xs text-ink/50">
-                    {p.school ?? "No school listed"} · {countFor(p.id)} followers
+                    {p.school ?? "No school listed"} · {countFor(p.id)} followers · {lastSeenLabel(p.last_seen_at)}
                   </p>
                 </div>
               </Link>

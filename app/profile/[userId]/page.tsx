@@ -6,6 +6,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VerifyToggle } from "@/components/VerifyToggle";
 import { Avatar } from "@/components/Avatar";
+import { isActiveNow, lastSeenLabel } from "@/lib/presence";
 
 export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
   const supabase = createClient();
@@ -26,7 +27,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio, is_verified, avatar_url")
+    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at")
     .eq("id", params.userId)
     .single();
 
@@ -74,7 +75,12 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
   return (
     <div>
       <div className="mb-6 flex items-center gap-5">
-        <Avatar url={profile.avatar_url} name={profile.display_name} size={72} />
+        <Avatar
+          url={profile.avatar_url}
+          name={profile.display_name}
+          size={72}
+          active={isActiveNow(profile.last_seen_at)}
+        />
         <div className="flex flex-1 justify-around text-center">
           <div>
             <p className="text-base font-medium">{postedCount ?? 0}</p>
@@ -97,7 +103,9 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
       {profile.username ? (
         <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
       ) : null}
-      <p className="text-xs text-ink/40 dark:text-neutral-500">{profile.school ?? "No school listed"}</p>
+      <p className="text-xs text-ink/40 dark:text-neutral-500">
+        {profile.school ?? "No school listed"} · {lastSeenLabel(profile.last_seen_at)}
+      </p>
       {profile.bio ? (
         <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
       ) : null}
