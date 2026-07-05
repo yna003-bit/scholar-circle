@@ -81,16 +81,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {user ? (
               <>
                 <LanguageSwitcher current={lang} />
-                <NotificationBell userId={user.id} initialCount={unreadNotifications} />
-                <MobileMenu
-                  displayName={menuProfile?.display_name ?? null}
-                  username={menuProfile?.username ?? null}
-                  isVerified={menuProfile?.is_verified ?? false}
-                  avatarUrl={menuProfile?.avatar_url ?? null}
-                  followingCount={followingCount}
-                  followerCount={followerCount}
-                  lang={lang}
-                />
+                <div className="ml-auto flex items-center gap-3">
+                  <NotificationBell userId={user.id} initialCount={unreadNotifications} />
+                  <MobileMenu
+                    displayName={menuProfile?.display_name ?? null}
+                    username={menuProfile?.username ?? null}
+                    isVerified={menuProfile?.is_verified ?? false}
+                    avatarUrl={menuProfile?.avatar_url ?? null}
+                    followingCount={followingCount}
+                    followerCount={followerCount}
+                    lang={lang}
+                  />
+                </div>
               </>
             ) : null}
           </div>
