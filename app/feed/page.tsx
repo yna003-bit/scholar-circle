@@ -10,6 +10,12 @@ export default async function FeedPage() {
 
   if (!user) redirect("/login");
 
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
   const { data: blockRows } = await supabase
     .from("blocks")
     .select("blocker_id, blocked_id")
@@ -40,7 +46,7 @@ export default async function FeedPage() {
         <p className="text-sm text-red-600">Couldn&apos;t load the feed: {error.message}</p>
       ) : null}
       {visibleOpportunities.map((opp: any) => (
-        <OpportunityCard key={opp.id} opp={opp} userId={user.id} />
+        <OpportunityCard key={opp.id} opp={opp} userId={user.id} isAdmin={!!viewer?.is_admin} />
       ))}
       {!error && visibleOpportunities.length === 0 ? (
         <p className="text-sm text-ink/50">No listings yet — be the first to post one.</p>

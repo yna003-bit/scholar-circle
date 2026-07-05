@@ -187,12 +187,13 @@ export function PostForm({ userId }: { userId: string }) {
   );
 }
 
-export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: string }) {
+export function OpportunityCard({ opp, userId, isAdmin }: { opp: Opportunity; userId: string; isAdmin?: boolean }) {
   const supabase = createClient();
   const router = useRouter();
   const liked = opp.likes.some((l) => l.user_id === userId);
   const saved = opp.saved_posts.some((s) => s.user_id === userId);
   const isAuthor = opp.author_id === userId;
+  const canDeletePost = isAuthor || !!isAdmin;
   const [commentBody, setCommentBody] = useState("");
   const [showComments, setShowComments] = useState(false);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
@@ -368,22 +369,22 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
                 <Bookmark size={15} className={saved ? "fill-current" : ""} />
               </button>
               {isAuthor ? (
-                <>
-                  <button
-                    onClick={() => setEditing(true)}
-                    aria-label="Edit post"
-                    className="text-ink/40 hover:text-ink/70 dark:text-neutral-500 dark:hover:text-neutral-200"
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  <button
-                    onClick={deletePost}
-                    aria-label="Delete post"
-                    className="text-ink/40 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </>
+                <button
+                  onClick={() => setEditing(true)}
+                  aria-label="Edit post"
+                  className="text-ink/40 hover:text-ink/70 dark:text-neutral-500 dark:hover:text-neutral-200"
+                >
+                  <Pencil size={15} />
+                </button>
+              ) : null}
+              {canDeletePost ? (
+                <button
+                  onClick={deletePost}
+                  aria-label="Delete post"
+                  className="text-ink/40 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400"
+                >
+                  <Trash2 size={15} />
+                </button>
               ) : null}
             </div>
           </div>
