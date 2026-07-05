@@ -73,32 +73,34 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="bg-[#f7f7f5] text-ink dark:bg-neutral-950 dark:text-neutral-100">
         {user ? <PresenceHeartbeat userId={user.id} /> : null}
-        <nav className="border-b border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-          <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-            <Link href="/" className="whitespace-nowrap font-medium text-ink dark:text-white">
-              Scholar Circle
-            </Link>
-            {user ? (
-              <>
-                <LanguageSwitcher current={lang} />
-                <div className="ml-auto flex items-center gap-3">
-                  <NotificationBell userId={user.id} initialCount={unreadNotifications} />
-                  <MobileMenu
-                    displayName={menuProfile?.display_name ?? null}
-                    username={menuProfile?.username ?? null}
-                    isVerified={menuProfile?.is_verified ?? false}
-                    avatarUrl={menuProfile?.avatar_url ?? null}
-                    followingCount={followingCount}
-                    followerCount={followerCount}
-                    lang={lang}
-                  />
-                </div>
-              </>
-            ) : null}
-          </div>
-        </nav>
-        <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
-        <Footer />
+        {user ? (
+          <nav className="border-b border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+            <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+              <Link href="/" className="whitespace-nowrap font-medium text-ink dark:text-white">
+                Scholar Circle
+              </Link>
+              <LanguageSwitcher current={lang} />
+              <div className="ml-auto flex items-center gap-3">
+                <NotificationBell userId={user.id} initialCount={unreadNotifications} />
+                <MobileMenu
+                  displayName={menuProfile?.display_name ?? null}
+                  username={menuProfile?.username ?? null}
+                  isVerified={menuProfile?.is_verified ?? false}
+                  avatarUrl={menuProfile?.avatar_url ?? null}
+                  followingCount={followingCount}
+                  followerCount={followerCount}
+                  lang={lang}
+                />
+              </div>
+            </div>
+          </nav>
+        ) : null}
+        {user ? (
+          <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+        ) : (
+          <main>{children}</main>
+        )}
+        {user ? <Footer /> : null}
       </body>
     </html>
   );
