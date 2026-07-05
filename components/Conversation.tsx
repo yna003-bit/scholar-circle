@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/Avatar";
 import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText } from "lucide-react";
+import { notify } from "@/lib/notifications";
 
 type Message = {
   id: string;
@@ -333,6 +334,13 @@ export function Conversation({
     setBody("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     await supabase.from("messages").insert({ sender_id: userId, receiver_id: otherId, body: text });
+    notify({
+      userId: otherId,
+      actorId: userId,
+      type: "message",
+      link: `/messages/${userId}`,
+      preview: text.slice(0, 80),
+    });
   }
 
   async function handleEdit(id: string, newBody: string) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { notify } from "@/lib/notifications";
 
 type Status = "none" | "sent" | "received" | "friends";
 
@@ -25,6 +26,13 @@ export function FriendButton({
   async function sendRequest() {
     setBusy(true);
     await supabase.from("friend_requests").insert({ sender_id: userId, receiver_id: targetId });
+    notify({
+      userId: targetId,
+      actorId: userId,
+      type: "friend_request",
+      link: "/network/requests",
+      preview: "sent you a friend request",
+    });
     setStatus("sent");
     setBusy(false);
     router.refresh();

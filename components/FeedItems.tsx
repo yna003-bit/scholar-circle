@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark, Image as ImageIcon, X, Repeat2 } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
+import { notify } from "@/lib/notifications";
 
 type Opportunity = {
   id: string;
@@ -228,6 +229,13 @@ export function OpportunityCard({
       await supabase.from("likes").delete().match({ user_id: userId, opportunity_id: opp.id });
     } else {
       await supabase.from("likes").insert({ user_id: userId, opportunity_id: opp.id });
+      notify({
+        userId: opp.author_id,
+        actorId: userId,
+        type: "post_like",
+        link: `/feed#${opp.id}`,
+        preview: opp.title,
+      });
     }
     router.refresh();
   }
@@ -260,16 +268,30 @@ export function OpportunityCard({
     e.preventDefault();
     if (!commentBody.trim()) return;
     await supabase.from("comments").insert({ user_id: userId, opportunity_id: opp.id, body: commentBody });
+    notify({
+      userId: opp.author_id,
+      actorId: userId,
+      type: "post_comment",
+      link: `/feed#${opp.id}`,
+      preview: commentBody.slice(0, 80),
+    });
     setCommentBody("");
     if (commentInputRef.current) commentInputRef.current.style.height = "auto";
     router.refresh();
   }
 
-  async function toggleCommentLike(commentId: string, alreadyLiked: boolean) {
+  async function toggleCommentLike(commentId: string, alreadyLiked: boolean, commentOwnerId: string) {
     if (alreadyLiked) {
       await supabase.from("comment_likes").delete().match({ comment_id: commentId, user_id: userId });
     } else {
       await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: userId });
+      notify({
+        userId: commentOwnerId,
+        actorId: userId,
+        type: "comment_like",
+        link: `/feed#${opp.id}`,
+        preview: "liked your comment",
+      });
     }
     router.refresh();
   }
@@ -511,7 +533,7 @@ export function OpportunityCard({
                       </p>
                       <div className="mt-0.5 flex items-center gap-3 text-[11px] text-ink/40 dark:text-neutral-500">
                         <button
-                          onClick={() => toggleCommentLike(c.id, commentLiked)}
+                          onClick={() => toggleCommentLike(c.id, commentLiked, c.user_id)}
                           className={
                             commentLiked ? "font-medium text-blue-600 dark:text-blue-400" : "hover:text-ink/70 dark:hover:text-neutral-300"
                           }
