@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Avatar } from "@/components/Avatar";
 
 export default async function NetworkPage() {
   const supabase = createClient();
@@ -15,7 +16,7 @@ export default async function NetworkPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, is_verified")
+    .select("id, display_name, username, school, is_verified, avatar_url")
     .neq("id", user.id);
 
   const { data: myFollowing } = await supabase
@@ -65,9 +66,7 @@ export default async function NetworkPage() {
           return (
             <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3">
               <Link href={`/profile/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 text-xs font-medium text-ink">
-                  {p.display_name?.slice(0, 2).toUpperCase() ?? "?"}
-                </div>
+                <Avatar url={p.avatar_url} name={p.display_name} size={36} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium hover:underline">
                     {p.display_name}
