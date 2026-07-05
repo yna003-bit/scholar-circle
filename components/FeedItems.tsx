@@ -23,9 +23,9 @@ type Opportunity = {
   created_at: string;
   image_url?: string | null;
   profiles: { display_name: string; is_verified?: boolean; avatar_url?: string | null } | null;
-  likes: { user_id: string }[];
+  likes: { user_id: string; profiles?: { display_name: string; avatar_url?: string | null } | null }[];
   saved_posts: { user_id: string }[];
-  reposts: { user_id: string }[];
+  reposts: { user_id: string; profiles?: { display_name: string; avatar_url?: string | null } | null }[];
   comments: {
     id: string;
     body: string;
@@ -194,6 +194,8 @@ export function OpportunityCard({
   const canDeletePost = isAuthor || !!isAdmin;
   const [commentBody, setCommentBody] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const [showLikers, setShowLikers] = useState(false);
+  const [showReposters, setShowReposters] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === `#${opp.id}`) {
@@ -459,7 +461,11 @@ export function OpportunityCard({
 
           {opp.likes.length > 0 || opp.comments.length > 0 || opp.reposts.length > 0 ? (
             <p className="mt-3 text-xs text-ink/40 dark:text-neutral-500">
-              {opp.likes.length > 0 ? `${opp.likes.length} likes` : ""}
+              {opp.likes.length > 0 ? (
+                <button onClick={() => setShowLikers(!showLikers)} className="hover:underline">
+                  {opp.likes.length} likes
+                </button>
+              ) : null}
               {opp.likes.length > 0 && opp.comments.length > 0 ? " · " : ""}
               {opp.comments.length > 0 ? (
                 <button onClick={() => setShowComments(!showComments)} className="hover:underline">
@@ -467,8 +473,42 @@ export function OpportunityCard({
                 </button>
               ) : null}
               {(opp.likes.length > 0 || opp.comments.length > 0) && opp.reposts.length > 0 ? " · " : ""}
-              {opp.reposts.length > 0 ? `${opp.reposts.length} reposts` : ""}
+              {opp.reposts.length > 0 ? (
+                <button onClick={() => setShowReposters(!showReposters)} className="hover:underline">
+                  {opp.reposts.length} reposts
+                </button>
+              ) : null}
             </p>
+          ) : null}
+
+          {showLikers ? (
+            <div className="mt-2 flex flex-col gap-2 border-t border-black/5 pt-2 dark:border-white/5">
+              {opp.likes.map((l) => (
+                <Link
+                  key={l.user_id}
+                  href={`/profile/${l.user_id}`}
+                  className="flex items-center gap-2 text-xs text-ink hover:underline dark:text-neutral-200"
+                >
+                  <Avatar url={l.profiles?.avatar_url} name={l.profiles?.display_name} size={22} />
+                  {l.profiles?.display_name ?? "A student"}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {showReposters ? (
+            <div className="mt-2 flex flex-col gap-2 border-t border-black/5 pt-2 dark:border-white/5">
+              {opp.reposts.map((r) => (
+                <Link
+                  key={r.user_id}
+                  href={`/profile/${r.user_id}`}
+                  className="flex items-center gap-2 text-xs text-ink hover:underline dark:text-neutral-200"
+                >
+                  <Avatar url={r.profiles?.avatar_url} name={r.profiles?.display_name} size={22} />
+                  {r.profiles?.display_name ?? "A student"}
+                </Link>
+              ))}
+            </div>
           ) : null}
 
           <div className="mt-1 grid grid-cols-4 border-t border-black/10 pt-1 dark:border-white/10">
