@@ -59,7 +59,7 @@ function AttachmentContent({ message, isMine }: { message: Message; isMine: bool
   }
   if (message.attachment_type === "file" && message.attachment_url) {
     return (
-      
+      <a
         href={message.attachment_url}
         target="_blank"
         rel="noopener noreferrer"
