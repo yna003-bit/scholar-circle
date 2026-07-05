@@ -4,7 +4,7 @@ import { useState, useRef, createElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Pencil, Trash2, Bookmark, Image as ImageIcon, X } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Avatar } from "@/components/Avatar";
 
@@ -19,6 +19,7 @@ type Opportunity = {
   tags: string[] | null;
   author_id: string;
   created_at: string;
+  image_url?: string | null;
   profiles: { display_name: string; is_verified?: boolean; avatar_url?: string | null } | null;
   likes: { user_id: string }[];
   saved_posts: { user_id: string }[];
@@ -71,11 +72,38 @@ function linkify(text: string) {
   });
 }
 
+async function uploadPostImage(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  file: File
+): Promise<string | null> {
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "");
+  const path = `${userId}/${Date.now()}-${safeName}`;
+  const { error } = await supabase.storage.from("post-images").upload(path, file);
+  if (error) {
+    alert("Couldn't upload image: " + error.message);
+    return null;
+  }
+  const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export function PostForm({ userId }: { userId: string }) {
   const supabase = createClient();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageBusy(true);
+    const url = await uploadPostImage(supabase, userId, file);
+    if (url) setImageUrl(url);
+    setImageBusy(false);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,8 +111,10 @@ export function PostForm({ userId }: { userId: string }) {
       author_id: userId,
       title: form.title,
       description: form.description,
+      image_url: imageUrl,
     });
     setForm({ title: "", description: "" });
+    setImageUrl(null);
     setOpen(false);
     router.refresh();
   }
@@ -123,6 +153,28 @@ export function PostForm({ userId }: { userId: string }) {
         }}
         className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-2 text-sm"
       />
+
+      {imageUrl ? (
+        <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt="" className="max-h-64 w-full rounded-lg object-cover" />
+          <button
+            type="button"
+            onClick={() => setImageUrl(null)}
+            aria-label="Remove image"
+            className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ) : (
+        <label className="flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-black/15 px-3 py-2 text-xs font-medium text-ink/70 dark:text-neutral-300">
+          <ImageIcon size={15} />
+          {imageBusy ? "Uploading..." : "Add a picture"}
+          <input type="file" accept="image/*" onChange={handleImageChange} disabled={imageBusy} className="hidden" />
+        </label>
+      )}
+
       <div className="flex gap-2">
         <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
           Post
@@ -146,6 +198,17 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: opp.title, description: opp.description ?? "" });
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(opp.image_url ?? null);
+  const [editImageBusy, setEditImageBusy] = useState(false);
+
+  async function handleEditImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditImageBusy(true);
+    const url = await uploadPostImage(supabase, userId, file);
+    if (url) setEditImageUrl(url);
+    setEditImageBusy(false);
+  }
 
   async function toggleLike() {
     if (liked) {
@@ -208,7 +271,7 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
     e.preventDefault();
     await supabase
       .from("opportunities")
-      .update({ title: editForm.title, description: editForm.description })
+      .update({ title: editForm.title, description: editForm.description, image_url: editImageUrl })
       .eq("id", opp.id);
     setEditing(false);
     router.refresh();
@@ -237,6 +300,34 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
             }}
             className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-2 text-sm"
           />
+
+          {editImageUrl ? (
+            <div className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={editImageUrl} alt="" className="max-h-64 w-full rounded-lg object-cover" />
+              <button
+                type="button"
+                onClick={() => setEditImageUrl(null)}
+                aria-label="Remove image"
+                className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-black/15 px-3 py-2 text-xs font-medium text-ink/70 dark:text-neutral-300">
+              <ImageIcon size={15} />
+              {editImageBusy ? "Uploading..." : "Add a picture"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleEditImageChange}
+                disabled={editImageBusy}
+                className="hidden"
+              />
+            </label>
+          )}
+
           <div className="flex gap-2">
             <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
               Save
@@ -307,6 +398,16 @@ export function OpportunityCard({ opp, userId }: { opp: Opportunity; userId: str
               {linkify(opp.description)}
             </p>
           ) : null}
+
+          {opp.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={opp.image_url}
+              alt=""
+              className="mt-3 max-h-96 w-full rounded-lg object-cover"
+            />
+          ) : null}
+
           {opp.deadline ? (
             <p className="mt-1 text-xs text-ink/50 dark:text-neutral-400">Deadline: {opp.deadline}</p>
           ) : null}
