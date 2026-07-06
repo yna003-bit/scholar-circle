@@ -56,7 +56,7 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
       <Link href="/messages" className="mb-4 inline-block text-xs text-ink/60 underline dark:text-neutral-400">
         &larr; Back to messages
       </Link>
-      <h1 className="mb-1 text-lg font-medium">{otherProfile?.display_name ?? "Conversation"}</h1>
+      <h1 className="mb-1 text-lg font-medium text-ink dark:text-neutral-100">{otherProfile?.display_name ?? "Conversation"}</h1>
       <p className="mb-4 text-xs text-ink/40 dark:text-neutral-500">
         Messages are private between you and the recipient.
       </p>
