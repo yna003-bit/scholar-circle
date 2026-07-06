@@ -29,7 +29,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at, is_suspended")
+    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at, is_suspended, email")
     .eq("id", params.userId)
     .single();
 
@@ -115,6 +115,9 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
       <p className="text-xs text-ink/40 dark:text-neutral-500">
         {profile.school ?? "No school listed"} · {lastSeenLabel(profile.last_seen_at)}
       </p>
+      {viewer?.is_admin ? (
+        <p className="text-xs text-ink/40 dark:text-neutral-500">{profile.email}</p>
+      ) : null}
       {profile.bio ? (
         <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
       ) : null}

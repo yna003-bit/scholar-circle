@@ -15,6 +15,12 @@ export default async function NetworkPage() {
 
   if (!user) redirect("/login");
 
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
   const { data: blockRows } = await supabase
     .from("blocks")
     .select("blocker_id, blocked_id")
@@ -26,7 +32,7 @@ export default async function NetworkPage() {
 
   const { data: allProfiles } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, is_verified, avatar_url, last_seen_at")
+    .select("id, display_name, username, school, is_verified, avatar_url, last_seen_at, email")
     .neq("id", user.id);
 
   const profiles = (allProfiles ?? []).filter((p) => !excludedIds.has(p.id));
@@ -88,6 +94,9 @@ export default async function NetworkPage() {
                   <p className="truncate text-xs text-ink/50">
                     {p.school ?? "No school listed"} · {countFor(p.id)} followers · {lastSeenLabel(p.last_seen_at)}
                   </p>
+                  {viewer?.is_admin ? (
+                    <p className="truncate text-xs text-ink/40">{p.email}</p>
+                  ) : null}
                 </div>
               </Link>
               <div className="ml-2 flex shrink-0 items-center gap-2">
