@@ -2,3 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inputs keep light backgrounds in dark mode, so force dark text */
+.dark input,
+.dark textarea,
+.dark select {
+  color: #111827;
+  caret-color: #111827;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7280;
+}
