@@ -1,6 +1,21 @@
-export default function RequirementsPage() {
-  return (
-    <div className="prose prose-sm max-w-none">
+import { createClient } from "@/lib/supabase/server";
+import { MarketingHeader } from "@/components/MarketingHeader";
+import { MarketingFooter } from "@/components/MarketingFooter";
+
+export default async function RequirementsPage() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const content = (
+    <div
+      className={
+        user
+          ? "prose prose-sm max-w-none"
+          : "prose prose-sm mx-auto max-w-2xl px-6 py-16"
+      }
+    >
       <h1 className="text-lg font-medium">Scholarship application requirements</h1>
       <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">
         A general guide to what most scholarship and university applications ask for, from
@@ -74,5 +89,17 @@ export default function RequirementsPage() {
         exact requirements with the university or scholarship provider directly.
       </p>
     </div>
+  );
+
+  if (user) {
+    return content;
+  }
+
+  return (
+    <>
+      <MarketingHeader />
+      {content}
+      <MarketingFooter />
+    </>
   );
 }
