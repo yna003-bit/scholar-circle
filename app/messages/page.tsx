@@ -38,16 +38,16 @@ export default async function MessagesPage() {
           <Link
             key={id}
             href={`/messages/${id}`}
-            className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3"
+            className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-neutral-900"
           >
             <div>
-              <p className="text-sm font-medium">{nameFor(id)}</p>
-              <p className="truncate text-xs text-ink/50">{partners.get(id)?.lastBody}</p>
+              <p className="text-sm font-medium text-ink dark:text-neutral-100">{nameFor(id)}</p>
+              <p className="truncate text-xs text-ink/50 dark:text-neutral-400">{partners.get(id)?.lastBody}</p>
             </div>
           </Link>
         ))}
         {partnerIds.length === 0 ? (
-          <p className="text-sm text-ink/50">
+          <p className="text-sm text-ink/50 dark:text-neutral-400">
             No conversations yet — start one from a student&apos;s profile in Network.
           </p>
         ) : null}
