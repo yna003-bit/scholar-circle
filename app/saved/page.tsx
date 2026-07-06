@@ -33,7 +33,7 @@ export default async function SavedPage() {
         <OpportunityCard key={opp.id} opp={opp} userId={user.id} />
       ))}
       {!error && opportunities.length === 0 ? (
-        <p className="text-sm text-ink/50">
+        <p className="text-sm text-ink/50 dark:text-neutral-400">
           Nothing saved yet — tap the bookmark icon on any post in the Feed to save it here.
         </p>
       ) : null}

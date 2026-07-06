@@ -32,7 +32,7 @@ export function FollowButton({
       onClick={toggle}
       className={
         following
-          ? "rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70"
+          ? "rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70 dark:border-white/15 dark:text-neutral-300"
           : "rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white"
       }
     >

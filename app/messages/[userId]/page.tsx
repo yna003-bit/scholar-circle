@@ -53,7 +53,7 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
 
   return (
     <div>
-      <Link href="/messages" className="mb-4 inline-block text-xs text-ink/60 underline">
+      <Link href="/messages" className="mb-4 inline-block text-xs text-ink/60 underline dark:text-neutral-400">
         &larr; Back to messages
       </Link>
       <h1 className="mb-1 text-lg font-medium">{otherProfile?.display_name ?? "Conversation"}</h1>

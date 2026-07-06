@@ -26,7 +26,7 @@ export function ThemeToggle({ lang }: { lang: LanguageCode }) {
       {dark ? (
         <Sun size={17} className="text-ink/60 dark:text-neutral-400" />
       ) : (
-        <Moon size={17} className="text-ink/60" />
+        <Moon size={17} className="text-ink/60 dark:text-neutral-400" />
       )}
       {dark ? t("lightMode", lang) : t("darkMode", lang)}
     </button>

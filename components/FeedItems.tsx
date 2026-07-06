@@ -127,7 +127,7 @@ export function PostForm({ userId }: { userId: string }) {
         placeholder="Title"
         value={form.title}
         onChange={(e) => setForm({ ...form, title: e.target.value })}
-        className="rounded-lg border border-black/15 px-3 py-2 text-sm"
+        className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
       />
       <textarea
         required
@@ -138,7 +138,7 @@ export function PostForm({ userId }: { userId: string }) {
           e.target.style.height = "auto";
           e.target.style.height = `${e.target.scrollHeight}px`;
         }}
-        className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-2 text-sm"
+        className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
       />
 
       {imageUrl ? (
@@ -166,7 +166,7 @@ export function PostForm({ userId }: { userId: string }) {
         <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
           Post
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-ink/60">
+        <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-ink/60 dark:text-neutral-400">
           Cancel
         </button>
       </div>
@@ -187,7 +187,8 @@ export function OpportunityCard({
 }) {
   const supabase = createClient();
   const router = useRouter();
-  const liked = opp.likes.some((l) => l.user_id === userId);
+  const [liked, setLiked] = useState(opp.likes.some((l) => l.user_id === userId));
+  const [likeCount, setLikeCount] = useState(opp.likes.length);
   const saved = opp.saved_posts.some((s) => s.user_id === userId);
   const reposted = opp.reposts.some((r) => r.user_id === userId);
   const isAuthor = opp.author_id === userId;
@@ -218,6 +219,9 @@ export function OpportunityCard({
   }
 
   async function toggleLike() {
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
     if (liked) {
       await supabase.from("likes").delete().match({ user_id: userId, opportunity_id: opp.id });
     } else {
@@ -326,7 +330,7 @@ export function OpportunityCard({
             required
             value={editForm.title}
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-            className="rounded-lg border border-black/15 px-3 py-2 text-sm"
+            className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
           />
           <textarea
             required
@@ -336,7 +340,7 @@ export function OpportunityCard({
               e.target.style.height = "auto";
               e.target.style.height = `${e.target.scrollHeight}px`;
             }}
-            className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-2 text-sm"
+            className="min-h-[96px] resize-none overflow-hidden rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
           />
 
           {editImageUrl ? (
@@ -370,7 +374,7 @@ export function OpportunityCard({
             <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">
               Save
             </button>
-            <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 text-sm text-ink/60">
+            <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 text-sm text-ink/60 dark:text-neutral-400">
               Cancel
             </button>
           </div>
@@ -459,20 +463,20 @@ export function OpportunityCard({
             <p className="mt-1 text-xs text-ink/50 dark:text-neutral-400">Deadline: {opp.deadline}</p>
           ) : null}
 
-          {opp.likes.length > 0 || opp.comments.length > 0 || opp.reposts.length > 0 ? (
+          {likeCount > 0 || opp.comments.length > 0 || opp.reposts.length > 0 ? (
             <p className="mt-3 text-xs text-ink/40 dark:text-neutral-500">
-              {opp.likes.length > 0 ? (
+              {likeCount > 0 ? (
                 <button onClick={() => setShowLikers(!showLikers)} className="hover:underline">
-                  {opp.likes.length} likes
+                  {likeCount} likes
                 </button>
               ) : null}
-              {opp.likes.length > 0 && opp.comments.length > 0 ? " · " : ""}
+              {likeCount > 0 && opp.comments.length > 0 ? " · " : ""}
               {opp.comments.length > 0 ? (
                 <button onClick={() => setShowComments(!showComments)} className="hover:underline">
                   {opp.comments.length} comments
                 </button>
               ) : null}
-              {(opp.likes.length > 0 || opp.comments.length > 0) && opp.reposts.length > 0 ? " · " : ""}
+              {(likeCount > 0 || opp.comments.length > 0) && opp.reposts.length > 0 ? " · " : ""}
               {opp.reposts.length > 0 ? (
                 <button onClick={() => setShowReposters(!showReposters)} className="hover:underline">
                   {opp.reposts.length} reposts
@@ -593,7 +597,7 @@ export function OpportunityCard({
                   }}
                   placeholder="Write a comment"
                   rows={1}
-                  className="min-h-[32px] flex-1 resize-none overflow-hidden rounded-lg border border-black/15 px-3 py-1.5 text-xs"
+                  className="min-h-[32px] flex-1 resize-none overflow-hidden rounded-lg border border-black/15 bg-white px-3 py-1.5 text-xs text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
                 />
                 <button
                   type="submit"
