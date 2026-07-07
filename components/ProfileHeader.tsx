@@ -66,15 +66,9 @@ export function ProfileHeader({
 }) {
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-      <div
-        className="relative h-20"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 15% 30%, rgba(37,99,235,0.18), transparent 45%), radial-gradient(circle at 85% 70%, rgba(96,165,250,0.22), transparent 50%), linear-gradient(135deg, #eff6ff, #dbeafe)",
-        }}
-      />
-      <div className="px-5 pb-5">
-        <div className="-mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="h-16 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 dark:from-blue-950 dark:via-blue-900 dark:to-blue-950" />
+      <div className="px-5 pb-5 pt-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="rounded-full border-4 border-white bg-white dark:border-neutral-900 dark:bg-neutral-900">
             <Avatar url={avatarUrl} name={displayName} size={76} active={active} />
           </div>
