@@ -74,7 +74,7 @@ export default async function NetworkPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-lg font-medium">Students</h1>
-        <Link href="/network/requests" className="text-xs text-ink/60 underline">
+        <Link href="/network/requests" className="text-xs text-ink/60 underline dark:text-neutral-400">
           Friend requests{pendingIncomingCount ? ` (${pendingIncomingCount})` : ""}
         </Link>
       </div>
@@ -82,20 +82,20 @@ export default async function NetworkPage() {
         {profiles.map((p) => {
           const friend = friendStateFor(p.id);
           return (
-            <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3">
+            <div key={p.id} className="flex items-center justify-between rounded-lg border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-neutral-900">
               <Link href={`/profile/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
                 <Avatar url={p.avatar_url} name={p.display_name} size={36} active={isActiveNow(p.last_seen_at)} />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium hover:underline">
+                  <p className="truncate text-sm font-medium text-ink hover:underline dark:text-neutral-100">
                     {p.display_name}
                     <VerifiedBadge verified={p.is_verified} />
-                    {p.username ? <span className="ml-1 text-xs font-normal text-ink/40">@{p.username}</span> : null}
+                    {p.username ? <span className="ml-1 text-xs font-normal text-ink/40 dark:text-neutral-500">@{p.username}</span> : null}
                   </p>
-                  <p className="truncate text-xs text-ink/50">
+                  <p className="truncate text-xs text-ink/50 dark:text-neutral-400">
                     {p.school ?? "No school listed"} · {countFor(p.id)} followers · {lastSeenLabel(p.last_seen_at)}
                   </p>
                   {viewer?.is_admin ? (
-                    <p className="truncate text-xs text-ink/40">{p.email}</p>
+                    <p className="truncate text-xs text-ink/40 dark:text-neutral-500">{p.email}</p>
                   ) : null}
                 </div>
               </Link>
@@ -109,7 +109,7 @@ export default async function NetworkPage() {
                 />
                 <Link
                   href={`/messages/${p.id}`}
-                  className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70"
+                  className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70 dark:border-white/15 dark:text-neutral-300"
                 >
                   Message
                 </Link>
@@ -117,7 +117,7 @@ export default async function NetworkPage() {
             </div>
           );
         })}
-        {profiles.length === 0 ? <p className="text-sm text-ink/50">No other students yet.</p> : null}
+        {profiles.length === 0 ? <p className="text-sm text-ink/50 dark:text-neutral-400">No other students yet.</p> : null}
       </div>
     </div>
   );
