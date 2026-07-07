@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import NextTopLoader from "nextjs-toploader";
 import { createClient } from "@/lib/supabase/server";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Footer } from "@/components/Footer";
@@ -29,30 +30,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let unreadNotifications = 0;
 
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("display_name, username, is_verified, avatar_url")
-      .eq("id", user.id)
-      .single();
+    const [{ data: profile }, { count: fc }, { count: flc }, { count: nc }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("display_name, username, is_verified, avatar_url")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("follows")
+        .select("followed_id", { count: "exact", head: true })
+        .eq("follower_id", user.id),
+      supabase
+        .from("follows")
+        .select("follower_id", { count: "exact", head: true })
+        .eq("followed_id", user.id),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .is("read_at", null),
+    ]);
     menuProfile = profile;
-
-    const { count: fc } = await supabase
-      .from("follows")
-      .select("followed_id", { count: "exact", head: true })
-      .eq("follower_id", user.id);
     followingCount = fc ?? 0;
-
-    const { count: flc } = await supabase
-      .from("follows")
-      .select("follower_id", { count: "exact", head: true })
-      .eq("followed_id", user.id);
     followerCount = flc ?? 0;
-
-    const { count: nc } = await supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .is("read_at", null);
     unreadNotifications = nc ?? 0;
   }
 
@@ -72,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="bg-[#f7f7f5] text-ink dark:bg-neutral-950 dark:text-neutral-100">
+        <NextTopLoader color="#16223D" showSpinner={false} height={3} />
         {user ? <PresenceHeartbeat userId={user.id} /> : null}
         {user ? (
           <nav className="border-b border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">

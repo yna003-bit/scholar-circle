@@ -19,29 +19,22 @@ export default async function FeedPage() {
   const cookieStore = cookies();
   const lang = (cookieStore.get("lang")?.value ?? "en") as LanguageCode;
 
-  const { data: viewer } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  const { data: blockRows } = await supabase
-    .from("blocks")
-    .select("blocker_id, blocked_id")
-    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+  const [{ data: viewer }, { data: blockRows }, { data: opportunities, error }, { data: repostRows }] =
+    await Promise.all([
+      supabase.from("profiles").select("is_admin").eq("id", user.id).single(),
+      supabase
+        .from("blocks")
+        .select("blocker_id, blocked_id")
+        .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`),
+      supabase.from("opportunities").select(OPP_FIELDS).order("created_at", { ascending: false }),
+      supabase
+        .from("reposts")
+        .select(`id, created_at, user_id, profiles!reposts_user_id_fkey(display_name), opportunities(${OPP_FIELDS})`),
+    ]);
 
   const excludedIds = new Set(
     (blockRows ?? []).map((b) => (b.blocker_id === user.id ? b.blocked_id : b.blocker_id))
   );
-
-  const { data: opportunities, error } = await supabase
-    .from("opportunities")
-    .select(OPP_FIELDS)
-    .order("created_at", { ascending: false });
-
-  const { data: repostRows } = await supabase
-    .from("reposts")
-    .select(`id, created_at, user_id, profiles!reposts_user_id_fkey(display_name), opportunities(${OPP_FIELDS})`);
 
   if (error) {
     console.error("Feed query error:", error);
@@ -85,7 +78,7 @@ export default async function FeedPage() {
         />
       ))}
       {!error && feedEntries.length === 0 ? (
-        <p className="text-sm text-ink/50">No listings yet — be the first to post one.</p>
+        <p className="text-sm text-ink/50 dark:text-neutral-400">No listings yet — be the first to post one.</p>
       ) : null}
     </div>
   );
