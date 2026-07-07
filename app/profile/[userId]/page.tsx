@@ -29,7 +29,7 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at, is_suspended, email")
+    .select("id, display_name, username, school, bio, is_verified, avatar_url, last_seen_at, is_suspended, email, country, city")
     .eq("id", params.userId)
     .single();
 
@@ -91,18 +91,18 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
           active={isActiveNow(profile.last_seen_at)}
         />
         <div className="flex flex-1 justify-around text-center">
-          <div>
+          <Link href={`/profile/${profile.id}/posts`}>
             <p className="text-base font-medium">{postedCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Posts</p>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${profile.id}/followers`}>
             <p className="text-base font-medium">{followerCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Followers</p>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${profile.id}/following`}>
             <p className="text-base font-medium">{followingCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Following</p>
-          </div>
+          </Link>
         </div>
       </div>
       <p className="text-sm font-medium">

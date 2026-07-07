@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText, Reply, X } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
+import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText, Reply, X } from "lucide-react";
 import { notify, notifyTags } from "@/lib/notifications";
 import { renderRichText } from "@/lib/richText";
 
@@ -115,7 +115,7 @@ function QuotedPreview({
     <div className="mb-1 rounded-lg border-l-2 border-black/15 bg-black/5 px-2 py-1 text-xs dark:border-white/15 dark:bg-white/5">
       <p className="font-medium text-ink/70 dark:text-neutral-300">{quotedIsMine ? "You" : quotedName}</p>
       <p className="truncate text-ink/50 dark:text-neutral-400">
-        {quoted.deleted_for_everyone ? "This message was deleted" : quoted.body}
+        {quoted.deleted_for_everyone ? "This message was deleted" : quoted.attachment_url ? quoted.body : quoted.body}
       </p>
     </div>
   );
@@ -259,7 +259,9 @@ function MessageBubble({
         ) : (
           <>
             {message.reply_to_id ? (
-              <QuotedPreview quoted={quoted} quotedIsMine={quotedIsMine} quotedName={quotedName} />
+              <div className={isMine ? "w-full" : "w-full"}>
+                <QuotedPreview quoted={quoted} quotedIsMine={quotedIsMine} quotedName={quotedName} />
+              </div>
             ) : null}
             {message.deleted_for_everyone ? (
               <div className="rounded-lg bg-black/5 px-3 py-2 text-sm italic text-ink/40 dark:bg-white/5 dark:text-neutral-500">

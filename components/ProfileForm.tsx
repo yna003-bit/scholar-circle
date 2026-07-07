@@ -12,6 +12,8 @@ type Profile = {
   school: string | null;
   bio: string | null;
   avatar_url?: string | null;
+  country?: string | null;
+  city?: string | null;
 };
 
 export function ProfileForm({ profile }: { profile: Profile }) {
@@ -22,6 +24,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     username: profile.username ?? "",
     school: profile.school ?? "",
     bio: profile.bio ?? "",
+    country: profile.country ?? "",
+    city: profile.city ?? "",
   });
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -80,6 +84,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         username: cleanUsername || null,
         school: form.school || null,
         bio: form.bio || null,
+        country: form.country || null,
+        city: form.city || null,
       })
       .eq("id", profile.id);
 
@@ -131,22 +137,22 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <input
             value={form.display_name}
             onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
           />
         </label>
 
         <label className="text-xs font-medium text-ink/60 dark:text-neutral-400">
           Username
-          <div className="mt-1 flex items-center rounded-lg border border-black/15 px-3 py-2 text-sm">
-            <span className="text-ink/40">@</span>
+          <div className="mt-1 flex items-center rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100">
+            <span className="text-ink/40 dark:text-neutral-500">@</span>
             <input
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="yourname"
-              className="ml-1 flex-1 outline-none"
+              className="ml-1 flex-1 bg-transparent outline-none"
             />
           </div>
-          <span className="mt-1 block text-[11px] text-ink/40">
+          <span className="mt-1 block text-[11px] text-ink/40 dark:text-neutral-500">
             Lowercase letters, numbers, and underscores only. This is how other students can find
             you.
           </span>
@@ -157,16 +163,35 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <input
             value={form.school}
             onChange={(e) => setForm({ ...form, school: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
           />
         </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="text-xs font-medium text-ink/60 dark:text-neutral-400">
+            City
+            <input
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
+            />
+          </label>
+          <label className="text-xs font-medium text-ink/60 dark:text-neutral-400">
+            Country
+            <input
+              value={form.country}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
+            />
+          </label>
+        </div>
 
         <label className="text-xs font-medium text-ink/60 dark:text-neutral-400">
           Bio
           <textarea
             value={form.bio}
             onChange={(e) => setForm({ ...form, bio: e.target.value })}
-            className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
             rows={3}
           />
         </label>

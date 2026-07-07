@@ -36,7 +36,7 @@ export default async function MessageThreadPage({ params }: { params: { userId: 
   const { data: messages } = await supabase
     .from("messages")
     .select(
-      "id, sender_id, receiver_id, body, created_at, delivered_at, read_at, edited_at, deleted_for_everyone, attachment_url, attachment_type"
+      "id, sender_id, receiver_id, body, created_at, delivered_at, read_at, edited_at, deleted_for_everyone, attachment_url, attachment_type, reply_to_id"
     )
     .or(
       `and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`
