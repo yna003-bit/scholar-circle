@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/ProfileForm";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -39,18 +40,18 @@ export default async function ProfilePage() {
       <div className="mb-6 flex items-center gap-5">
         <Avatar url={profile.avatar_url} name={profile.display_name} size={72} />
         <div className="flex flex-1 justify-around text-center">
-          <div>
+          <Link href={`/profile/${user.id}/posts`}>
             <p className="text-base font-medium">{postedCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Posts</p>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${user.id}/followers`}>
             <p className="text-base font-medium">{followerCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Followers</p>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${user.id}/following`}>
             <p className="text-base font-medium">{followingCount ?? 0}</p>
             <p className="text-[11px] text-ink/40 dark:text-neutral-500">Following</p>
-          </div>
+          </Link>
         </div>
       </div>
       <p className="text-sm font-medium">
