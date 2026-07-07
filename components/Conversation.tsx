@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText, Reply, X } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
-import { Check, CheckCheck, MoreVertical, Mic, Square, Paperclip, File as FileIcon, FileText } from "lucide-react";
 import { notify, notifyTags } from "@/lib/notifications";
 import { renderRichText } from "@/lib/richText";
 
@@ -20,6 +20,7 @@ type Message = {
   deleted_for_everyone?: boolean;
   attachment_url?: string | null;
   attachment_type?: string | null;
+  reply_to_id?: string | null;
 };
 
 type PersonInfo = { name: string | null; avatarUrl: string | null };
@@ -58,7 +59,7 @@ function AttachmentContent({ message, isMine }: { message: Message; isMine: bool
   }
   if (message.attachment_type === "pdf" && message.attachment_url) {
     return (
-      <a
+      
         href={message.attachment_url}
         target="_blank"
         rel="noopener noreferrer"
@@ -78,7 +79,7 @@ function AttachmentContent({ message, isMine }: { message: Message; isMine: bool
   }
   if (message.attachment_type === "file" && message.attachment_url) {
     return (
-      <a
+      
         href={message.attachment_url}
         target="_blank"
         rel="noopener noreferrer"
@@ -94,22 +95,58 @@ function AttachmentContent({ message, isMine }: { message: Message; isMine: bool
   return null;
 }
 
+function QuotedPreview({
+  quoted,
+  quotedIsMine,
+  quotedName,
+}: {
+  quoted: Message | undefined;
+  quotedIsMine: boolean;
+  quotedName: string;
+}) {
+  if (!quoted) {
+    return (
+      <div className="mb-1 rounded-lg border-l-2 border-black/15 bg-black/5 px-2 py-1 text-xs italic text-ink/40 dark:border-white/15 dark:bg-white/5 dark:text-neutral-500">
+        Original message unavailable
+      </div>
+    );
+  }
+  return (
+    <div className="mb-1 rounded-lg border-l-2 border-black/15 bg-black/5 px-2 py-1 text-xs dark:border-white/15 dark:bg-white/5">
+      <p className="font-medium text-ink/70 dark:text-neutral-300">{quotedIsMine ? "You" : quotedName}</p>
+      <p className="truncate text-ink/50 dark:text-neutral-400">
+        {quoted.deleted_for_everyone ? "This message was deleted" : quoted.body}
+      </p>
+    </div>
+  );
+}
+
 function MessageBubble({
   message,
   isMine,
   person,
   personId,
+  allMessages,
+  myProfile,
+  otherProfile,
+  userId,
   onEdit,
   onDeleteForEveryone,
   onDeleteForMe,
+  onReply,
 }: {
   message: Message;
   isMine: boolean;
   person: PersonInfo;
   personId: string;
+  allMessages: Message[];
+  myProfile: PersonInfo;
+  otherProfile: PersonInfo;
+  userId: string;
   onEdit: (id: string, newBody: string) => void;
   onDeleteForEveryone: (id: string) => void;
   onDeleteForMe: (id: string) => void;
+  onReply: (message: Message) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -121,6 +158,10 @@ function MessageBubble({
     !message.attachment_url &&
     Date.now() - new Date(message.created_at).getTime() < EDIT_WINDOW_MS;
 
+  const quoted = message.reply_to_id ? allMessages.find((m) => m.id === message.reply_to_id) : undefined;
+  const quotedIsMine = quoted?.sender_id === userId;
+  const quotedName = quotedIsMine ? "" : otherProfile.name ?? "them";
+
   function saveEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editBody.trim()) return;
@@ -129,7 +170,7 @@ function MessageBubble({
   }
 
   return (
-    <div className={`mb-3 flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}>
+    <div className={`mb-1.5 flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}>
       {!isMine ? (
         <Link href={`/profile/${personId}`} className="shrink-0">
           <Avatar url={person.avatarUrl} name={person.name} size={28} />
@@ -137,6 +178,13 @@ function MessageBubble({
       ) : null}
       <div className={`group flex max-w-[75%] flex-col ${isMine ? "items-end" : "items-start"}`}>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => onReply(message)}
+            aria-label="Reply"
+            className="opacity-0 transition-opacity group-hover:opacity-100 text-ink/40 hover:text-ink/70 dark:text-neutral-500"
+          >
+            <Reply size={14} />
+          </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -196,33 +244,40 @@ function MessageBubble({
               value={editBody}
               onChange={(e) => setEditBody(e.target.value)}
               rows={2}
-              className="w-64 resize-none rounded-lg border border-black/15 px-2 py-1.5 text-sm"
+              className="w-64 resize-none rounded-lg border border-black/15 bg-white px-2 py-1.5 text-sm text-ink dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
               autoFocus
             />
             <div className="flex gap-2 text-xs">
               <button type="submit" className="text-ink underline dark:text-neutral-100">
                 Save
               </button>
-              <button type="button" onClick={() => setEditing(false)} className="text-ink/50">
+              <button type="button" onClick={() => setEditing(false)} className="text-ink/50 dark:text-neutral-400">
                 Cancel
               </button>
             </div>
           </form>
-        ) : message.deleted_for_everyone ? (
-          <div className="rounded-lg bg-black/5 px-3 py-2 text-sm italic text-ink/40 dark:bg-white/5 dark:text-neutral-500">
-            This message was deleted
-          </div>
-        ) : message.attachment_url ? (
-          <AttachmentContent message={message} isMine={isMine} />
         ) : (
-          <div
-            className={`flex items-end gap-1.5 rounded-lg px-3 py-2 text-sm ${
-              isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
-            }`}
-          >
-            <span>{renderRichText(message.body)}</span>
-            {isMine ? <MessageTicks message={message} /> : null}
-          </div>
+          <>
+            {message.reply_to_id ? (
+              <QuotedPreview quoted={quoted} quotedIsMine={quotedIsMine} quotedName={quotedName} />
+            ) : null}
+            {message.deleted_for_everyone ? (
+              <div className="rounded-lg bg-black/5 px-3 py-2 text-sm italic text-ink/40 dark:bg-white/5 dark:text-neutral-500">
+                This message was deleted
+              </div>
+            ) : message.attachment_url ? (
+              <AttachmentContent message={message} isMine={isMine} />
+            ) : (
+              <div
+                className={`flex items-end gap-1.5 rounded-lg px-3 py-2 text-sm ${
+                  isMine ? "bg-ink text-white" : "bg-black/5 text-ink dark:bg-white/10 dark:text-neutral-100"
+                }`}
+              >
+                <span>{renderRichText(message.body)}</span>
+                {isMine ? <MessageTicks message={message} /> : null}
+              </div>
+            )}
+          </>
         )}
 
         <div className="mt-0.5 flex items-center gap-1 text-[10px] text-ink/40 dark:text-neutral-500">
@@ -258,6 +313,7 @@ export function Conversation({
   const [otherTyping, setOtherTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -332,9 +388,13 @@ export function Conversation({
     e.preventDefault();
     if (!body.trim()) return;
     const text = body;
+    const replyId = replyingTo?.id ?? null;
     setBody("");
+    setReplyingTo(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
-    await supabase.from("messages").insert({ sender_id: userId, receiver_id: otherId, body: text });
+    await supabase
+      .from("messages")
+      .insert({ sender_id: userId, receiver_id: otherId, body: text, reply_to_id: replyId });
     notify({
       userId: otherId,
       actorId: userId,
@@ -456,9 +516,14 @@ export function Conversation({
               isMine={isMine}
               person={person}
               personId={personId}
+              allMessages={messages}
+              myProfile={myProfile}
+              otherProfile={otherProfile}
+              userId={userId}
               onEdit={handleEdit}
               onDeleteForEveryone={handleDeleteForEveryone}
               onDeleteForMe={handleDeleteForMe}
+              onReply={setReplyingTo}
             />
           );
         })}
@@ -472,6 +537,24 @@ export function Conversation({
         ) : null}
         <div ref={bottomRef} />
       </div>
+
+      {replyingTo ? (
+        <div className="flex items-center justify-between border-t border-black/10 bg-black/5 px-3 py-2 text-xs dark:border-white/10 dark:bg-white/5">
+          <div className="min-w-0">
+            <p className="font-medium text-ink/70 dark:text-neutral-300">
+              Replying to {replyingTo.sender_id === userId ? "yourself" : otherProfile.name ?? "them"}
+            </p>
+            <p className="truncate text-ink/50 dark:text-neutral-400">{replyingTo.body}</p>
+          </div>
+          <button
+            onClick={() => setReplyingTo(null)}
+            aria-label="Cancel reply"
+            className="ml-2 shrink-0 text-ink/50 hover:text-ink/80 dark:text-neutral-400"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      ) : null}
 
       <form onSubmit={send} className="relative flex items-end gap-2 border-t border-black/10 p-3 dark:border-white/10">
         <input ref={fileInputRef} type="file" onChange={handleFileSelect} disabled={uploading} className="hidden" />
@@ -497,7 +580,7 @@ export function Conversation({
           placeholder={isRecording ? "Recording..." : "Write a message"}
           rows={1}
           disabled={isRecording}
-          className="min-h-[38px] max-h-32 flex-1 resize-none overflow-y-auto rounded-lg border border-black/15 px-3 py-2 text-sm disabled:opacity-50"
+          className="min-h-[38px] max-h-32 flex-1 resize-none overflow-y-auto rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-ink disabled:opacity-50 dark:border-white/15 dark:bg-neutral-800 dark:text-neutral-100"
         />
 
         <button
