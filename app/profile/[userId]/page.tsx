@@ -3,11 +3,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { FollowButton } from "@/components/FollowButton";
 import { FriendButton } from "@/components/FriendButton";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { VerifyToggle } from "@/components/VerifyToggle";
 import { BlockToggle } from "@/components/BlockToggle";
 import { SuspendToggle } from "@/components/SuspendToggle";
-import { Avatar } from "@/components/Avatar";
+import { ProfileHeader } from "@/components/ProfileHeader";
 import { isActiveNow, lastSeenLabel } from "@/lib/presence";
 
 export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
@@ -83,72 +82,50 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
 
   return (
     <div>
-      <div className="mb-6 flex items-center gap-5">
-        <Avatar
-          url={profile.avatar_url}
-          name={profile.display_name}
-          size={72}
-          active={isActiveNow(profile.last_seen_at)}
-        />
-        <div className="flex flex-1 justify-around text-center">
-          <Link href={`/profile/${profile.id}/posts`}>
-            <p className="text-base font-medium">{postedCount ?? 0}</p>
-            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Posts</p>
-          </Link>
-          <Link href={`/profile/${profile.id}/followers`}>
-            <p className="text-base font-medium">{followerCount ?? 0}</p>
-            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Followers</p>
-          </Link>
-          <Link href={`/profile/${profile.id}/following`}>
-            <p className="text-base font-medium">{followingCount ?? 0}</p>
-            <p className="text-[11px] text-ink/40 dark:text-neutral-500">Following</p>
-          </Link>
-        </div>
-      </div>
-      <p className="text-sm font-medium">
-        {profile.display_name}
-        <VerifiedBadge verified={profile.is_verified} />
-      </p>
-      {profile.username ? (
-        <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
-      ) : null}
-      {profile.city || profile.country ? (
-        <p className="text-xs text-ink/40 dark:text-neutral-500">
-          {[profile.city, profile.country].filter(Boolean).join(", ")}
-        </p>
-      ) : null}
-      <p className="text-xs text-ink/40 dark:text-neutral-500">
-        {profile.school ?? "No school listed"} · {lastSeenLabel(profile.last_seen_at)}
-      </p>
-      {viewer?.is_admin ? (
-        <p className="text-xs text-ink/40 dark:text-neutral-500">{profile.email}</p>
-      ) : null}
-      {profile.bio ? (
-        <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
-      ) : null}
+      <ProfileHeader
+        profileId={profile.id}
+        avatarUrl={profile.avatar_url}
+        displayName={profile.display_name}
+        username={profile.username}
+        bio={profile.bio}
+        school={profile.school}
+        city={profile.city}
+        country={profile.country}
+        isVerified={!!profile.is_verified}
+        active={isActiveNow(profile.last_seen_at)}
+        statusLabel={lastSeenLabel(profile.last_seen_at)}
+        postedCount={postedCount ?? 0}
+        followerCount={followerCount ?? 0}
+        followingCount={followingCount ?? 0}
+        actions={
+          <>
+            <FollowButton userId={user.id} targetId={profile.id} initiallyFollowing={!!myFollow} />
+            <FriendButton
+              userId={user.id}
+              targetId={profile.id}
+              requestId={friendRequestId}
+              initialStatus={friendStatus}
+            />
+            <Link
+              href={`/messages/${profile.id}`}
+              className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 dark:border-blue-900 dark:text-blue-300"
+            >
+              Message
+            </Link>
+            <BlockToggle userId={user.id} targetId={profile.id} initiallyBlocked={!!myBlock} />
+            {viewer?.is_admin ? (
+              <VerifyToggle targetId={profile.id} initiallyVerified={!!profile.is_verified} />
+            ) : null}
+            {viewer?.is_admin ? (
+              <SuspendToggle targetId={profile.id} initiallySuspended={!!profile.is_suspended} />
+            ) : null}
+          </>
+        }
+      />
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <FollowButton userId={user.id} targetId={profile.id} initiallyFollowing={!!myFollow} />
-        <FriendButton
-          userId={user.id}
-          targetId={profile.id}
-          requestId={friendRequestId}
-          initialStatus={friendStatus}
-        />
-        <Link
-          href={`/messages/${profile.id}`}
-          className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium text-ink/70 dark:border-white/15 dark:text-neutral-300"
-        >
-          Message
-        </Link>
-        <BlockToggle userId={user.id} targetId={profile.id} initiallyBlocked={!!myBlock} />
-        {viewer?.is_admin ? (
-          <VerifyToggle targetId={profile.id} initiallyVerified={!!profile.is_verified} />
-        ) : null}
-        {viewer?.is_admin ? (
-          <SuspendToggle targetId={profile.id} initiallySuspended={!!profile.is_suspended} />
-        ) : null}
-      </div>
+      {viewer?.is_admin ? (
+        <p className="mb-4 text-xs text-ink/40 dark:text-neutral-500">Email: {profile.email}</p>
+      ) : null}
     </div>
   );
 }
