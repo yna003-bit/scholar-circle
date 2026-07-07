@@ -74,11 +74,11 @@ export function ProfileHeader({
         }}
       />
       <div className="px-5 pb-5">
-        <div className="-mt-10 flex items-end justify-between">
+        <div className="-mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="rounded-full border-4 border-white bg-white dark:border-neutral-900 dark:bg-neutral-900">
             <Avatar url={avatarUrl} name={displayName} size={76} active={active} />
           </div>
-          <div className="mb-1 flex gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:mb-1 sm:flex">
             <StatChip href={`/profile/${profileId}/posts`} count={postedCount} label="Posts" />
             <StatChip href={`/profile/${profileId}/followers`} count={followerCount} label="Followers" />
             <StatChip href={`/profile/${profileId}/following`} count={followingCount} label="Following" />
