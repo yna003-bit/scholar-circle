@@ -66,7 +66,14 @@ export function ProfileHeader({
 }) {
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-      <div className="h-16 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 dark:from-blue-950 dark:via-blue-900 dark:to-blue-950" />
+      <div className="relative flex h-16 items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 dark:from-blue-950 dark:via-blue-900 dark:to-blue-950">
+        <span
+          className="select-none text-2xl italic tracking-wide text-blue-700/25 dark:text-blue-200/20"
+          style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+        >
+          Scholar Circle
+        </span>
+      </div>
       <div className="px-5 pb-5 pt-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="rounded-full border-4 border-white bg-white dark:border-neutral-900 dark:bg-neutral-900">
