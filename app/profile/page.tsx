@@ -61,6 +61,11 @@ export default async function ProfilePage() {
       {profile.username ? (
         <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
       ) : null}
+      {profile.city || profile.country ? (
+        <p className="text-xs text-ink/40 dark:text-neutral-500">
+          {[profile.city, profile.country].filter(Boolean).join(", ")}
+        </p>
+      ) : null}
       {profile.bio ? (
         <p className="mt-2 text-sm text-ink/70 dark:text-neutral-300">{profile.bio}</p>
       ) : null}

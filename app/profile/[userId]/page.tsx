@@ -112,6 +112,11 @@ export default async function PublicProfilePage({ params }: { params: { userId: 
       {profile.username ? (
         <p className="text-xs text-ink/40 dark:text-neutral-500">@{profile.username}</p>
       ) : null}
+      {profile.city || profile.country ? (
+        <p className="text-xs text-ink/40 dark:text-neutral-500">
+          {[profile.city, profile.country].filter(Boolean).join(", ")}
+        </p>
+      ) : null}
       <p className="text-xs text-ink/40 dark:text-neutral-500">
         {profile.school ?? "No school listed"} · {lastSeenLabel(profile.last_seen_at)}
       </p>
